@@ -33,7 +33,7 @@ var obj = {
 
     RemoveCookie: function (resObject, name) {
         try {
-            resObject.cookie(name, { maxAge: Date.now() });
+            resObject.cookie(name, { maxAge: Date.now(), expires: Date.now() });
             return true;
         } catch (ee) {
             return false;

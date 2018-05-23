@@ -20,13 +20,18 @@ router.post('/', function (req, res, next) {
         }
 
         // Login failed
-        res.render('', { notification: 'Login failed', layout: 'admin/login' });
+        res.render('', { notification: 'Username or Password is incorrect', layout: 'admin/login' });
 
     });
 });
 
 router.get('/', function (req, res, next) {
     // ROUTING
+    if (req.param('logout') == 'true') {
+        console.log('=-===================')
+        console.log(lib.RemoveCookie(res,'admin'));
+    }
+
     res.render('', { layout: 'admin/login' });
 });
 

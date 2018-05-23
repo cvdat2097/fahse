@@ -4,13 +4,18 @@ var createError = require('http-errors');
 var express = require('express');
 var path = require('path');
 var cookieParser = require('cookie-parser');
+const bodyParser = require('body-parser');
 var logger = require('morgan');
 
 var indexRouter = require('./routes/index');
 var productRouter = require('./routes/product');
 var filterRouter = require('./routes/filter');
+var adminRouter = require('./routes/admin');
+var loginRouter = require('./routes/login');
 
 var app = express();
+app.use(bodyParser.json());
+app.use(bodyParser.urlencoded({ extended: true }));
 
 // Connect to database
 var mongoose = require('mongoose');
@@ -32,6 +37,8 @@ app.use('/', indexRouter);
 app.use('/index.html', indexRouter);
 app.use('/product.html', productRouter);
 app.use('/filter.html', filterRouter);
+app.use('/admin.html',adminRouter);
+app.use('/login.html',loginRouter);
 
 
 // catch 404 and forward to error handler

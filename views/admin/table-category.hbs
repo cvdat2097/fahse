@@ -1,0 +1,96 @@
+<div class="col-lg-12">
+    <div class="row">
+        <div class="col-lg-5"></div>
+        <div class="col-lg-2" style="margin-bottom: 20px;">
+            <a class="btn btn-success" data-toggle="modal" href="#myModal">Thêm Danh mục</a>
+        </div>
+        <!-- Modal -->
+        <div class="modal fade" id="myModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                        <h4 class="modal-title">Thêm mới danh mục</h4>
+                    </div>
+                    <div class="modal-body">
+                        <!--FORM-->
+                        <form action="/admin.html/category" method="POST">
+                            <div class="form-group">
+                                <input class="form-control" placeholder="Tên" name="name" />
+                            </div>
+                            
+                            <div class="form-group">
+                                <button data-dismiss="modal" class="btn btn-default" type="button">Thoát</button>
+                                <button class="btn btn-success" type="submit" name="button-add" value="category">Lưu</button>
+                            </div>
+                        </form>
+                        <!--FORM END-->
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- modal -->
+        <!-- Modal -->
+        <div class="modal fade" id="myModal2" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                        <h4 class="modal-title">Cập nhật</h4>
+                    </div>
+                    <div class="modal-body">
+                        <!--FORM-->
+                        <form action="/admin.html/category" method="POST">
+                            <div class="form-group">
+                                <input class="form-control" placeholder="Tên danh mục" name="name" />
+                            </div>
+                           
+                            <div class="form-group">
+                                <button data-dismiss="modal" class="btn btn-default" type="button">Thoát</button>
+                                <button id="updateButton" class="btn btn-warning" type="submit" name="button-update" value="">Cập nhật</button>
+                            </div>
+                        </form>
+                        <!--FORM END-->
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- modal -->
+        <div class="col-lg-5"></div>
+    </div>
+
+    <section class="panel">
+
+        <table class="table table-striped table-advance table-hover">
+            <tbody>
+                <tr>
+                    <th>
+                        <i class="icon_profile"></i> ID</th>
+                    <th>
+                        <i class="icon_calendar"></i> Tên danh mục</th>
+                    <th>
+                        <i class="icon_mobile"></i> Chỉnh sửa </th>
+                </tr>
+                {{#each cats}}
+                <tr>
+                    <td>{{_id}}</td>
+                    <td>{{name}}</td>
+                    
+                    <td>
+                        <div class="btn-group" style="width: 80px;">
+                            <a class="btn btn-primary" data-toggle="modal" href="#myModal2" onclick='document.getElementById("updateButton").value = "{{_id}}"'>
+                                <i class="icon_pens_alt"></i>
+                            </a>
+                            <form action="/admin.html/category" method="POST">
+                                <button class="btn btn-danger" type="submit" name="button-delete" value="{{_id}}">
+                                    <i class="icon_close_alt2"></i>
+                                </button>
+                            </form>
+                        </div>
+                    </td>
+                </tr>
+                {{/each}}
+            </tbody>
+        </table>
+    </section>
+</div>

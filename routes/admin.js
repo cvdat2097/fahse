@@ -8,7 +8,7 @@ var Category = require('../models/categoryModel');
 
 // Routing
 router.get('/', function (req, res, next) {
-  if (lib.GetCookie(req, 'admin') === null) {
+  if (req.session.userid == undefined) {
     res.redirect('/login.html');
     res.end();
   } else {
@@ -18,7 +18,7 @@ router.get('/', function (req, res, next) {
 
 router.get('/', function (req, res, next) {
   var table = req.param('table');
-  console.log(table);
+  
   switch (table) {
     case undefined:
       table = 'product';

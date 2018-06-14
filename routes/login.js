@@ -5,34 +5,38 @@ var lib = require('./lib');
 var Admin = require('../models/adminModel.js');
 
 router.post('/', function (req, res, next) {
-    console.log(req);
     var username = req.body['user'];
     var pass = req.body['pass'];
+
+    var loggedIn = false;
+
     Admin.find({}, function (err, adminList) {
         if (adminList.length > 0) {
             var i;
             for (i = 0; i < adminList.length; i++) {
                 if (adminList[i].username == username && adminList[i].password == pass) {
-                    lib.SetCookie(res, 'admin', username);
+                    req.session.userid = username;
                     res.redirect('/admin.html');
+                    loggedIn = true;
+                    break;
                 }
             }
         }
 
         // Login failed
-        res.render('', { notification: 'Username or Password is incorrect', layout: 'admin/login' });
+        if (loggedIn == false) {
+            res.render('', { notification: 'Username or Password is incorrect', layout: 'admin/login' });
+        }
 
     });
 });
 
 router.get('/', function (req, res, next) {
-    // ROUTING
-    if (req.param('logout') == 'true') {
-        console.log('=-===================')
-        console.log(lib.RemoveCookie(res,'admin'));
+    if (req.session.userid) {
+        res.redirect('/admin.html');
+    } else {
+        res.render('', { layout: 'admin/login' });
     }
-
-    res.render('', { layout: 'admin/login' });
 });
 
 module.exports = router;

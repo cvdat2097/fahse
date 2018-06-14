@@ -6,23 +6,13 @@
 				<div class="wrap-slick3-dots"></div>
 
 				<div class="slick3">
-					<div class="item-slick3" data-thumb="images/product/{{id}}_1.jpg">
+					{{#each images}}
+					<div class="item-slick3" data-thumb="{{this}}">
 						<div class="wrap-pic-w">
-							<img src="images/product/{{id}}_1.jpg" alt="IMG-PRODUCT">
+							<img src="{{this}}" alt="IMG-PRODUCT">
 						</div>
 					</div>
-
-					<div class="item-slick3" data-thumb="images/product/{{id}}_2.jpg">
-						<div class="wrap-pic-w">
-							<img src="images/product/{{id}}_2.jpg" alt="IMG-PRODUCT">
-						</div>
-					</div>
-
-					<div class="item-slick3" data-thumb="images/product/{{id}}_0.jpg">
-						<div class="wrap-pic-w">
-							<img src="images/product/{{id}}_0.jpg" alt="IMG-PRODUCT">
-						</div>
-					</div>
+					{{/each}}
 				</div>
 			</div>
 		</div>
@@ -33,7 +23,7 @@
 			</h4>
 
 			<span class="m-text17">
-				{{price}}
+				{{price}} VND
 			</span>
 
 			<p class="s-text8 p-t-10">
@@ -50,10 +40,9 @@
 					<div class="rs2-select2 rs3-select2 bo4 of-hidden w-size16">
 						<select class="selection-2" name="size">
 							<option>Chọn kích cỡ</option>
-							<option>S</option>
-							<option>M</option>
-							<option>L</option>
-							<option>XL</option>
+							{{#each size}}
+							<option>{{this}}</option>
+							{{/each}}
 						</select>
 					</div>
 				</div>
@@ -66,9 +55,9 @@
 					<div class="rs2-select2 rs3-select2 bo4 of-hidden w-size16">
 						<select class="selection-2" name="color">
 							<option>Chọn màu sắc</option>
-							<option>{{color.[0]}}</option>
-							<option>{{color.[1]}}</option>
-							<option>{{color.[2]}}</option>
+							{{#each color}}
+							<option>{{this}}</option>
+							{{/each}}
 						</select>
 					</div>
 				</div>
@@ -98,7 +87,7 @@
 			</div>
 
 			<div class="p-b-45">
-				<span class="s-text8">Danh mục: {{category}}</span>
+				<span class="s-text8">Danh mục: <a href="/filter.html?category={{categoryID}}">{{category}}</a></span>
 			</div>
 
 			<!--  -->

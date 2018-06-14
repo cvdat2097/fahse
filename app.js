@@ -6,12 +6,14 @@ var path = require('path');
 var cookieParser = require('cookie-parser');
 const bodyParser = require('body-parser');
 var logger = require('morgan');
+var session = require('express-session');
 
 var indexRouter = require('./routes/index');
 var productRouter = require('./routes/product');
 var filterRouter = require('./routes/filter');
 var adminRouter = require('./routes/admin');
 var loginRouter = require('./routes/login');
+var logoutRouter = require('./routes/logout');
 
 var app = express();
 app.use(bodyParser.json());
@@ -26,6 +28,10 @@ mongoose.connection.on('error', console.error.bind(console, 'MongoDB connection 
 // view engine setup
 app.set('views','./views');
 app.set('view engine', 'hbs');
+app.use(session({
+  secret: 'Do an 10 diem nhe'
+}));
+
 
 app.use(logger('dev'));
 app.use(express.json());
@@ -39,6 +45,7 @@ app.use('/product.html', productRouter);
 app.use('/filter.html', filterRouter);
 app.use('/admin.html',adminRouter);
 app.use('/login.html',loginRouter);
+app.use('/logout.html',logoutRouter);
 
 
 // catch 404 and forward to error handler

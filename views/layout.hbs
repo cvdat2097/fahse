@@ -82,7 +82,11 @@
 							<li>
 								<a href="index.html">Danh mục sản phẩm</a>
 								<ul class="sub_menu">
-									{{{categoryList}}}
+									{{#each categoryList}}
+									<li>
+										<a href="/filter.html?category={{_id}}">{{name}}</a>
+									</li>
+									{{/each}}
 								</ul>
 							</li>
 
@@ -321,12 +325,16 @@
 					<li class="item-menu-mobile">
 						<a href="index.html">Danh mục sản phẩm</a>
 						<ul class="sub_menu">
-							{{{categoryList}}}
+							{{#each categoryList}}
+							<li>
+								<a href="filter.html?category=">{{name}}</a>
+							</li>
+							{{/each}}
 						</ul>
 						<i class="arrow-main-menu fa fa-angle-right" aria-hidden="true"></i>
 					</li>
 
-				
+
 				</ul>
 			</nav>
 		</div>

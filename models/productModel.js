@@ -8,7 +8,7 @@ var ProductSchema = new mongoose.Schema({
     size: [String],
     color: [String],
     images: [String],
-    category: [String]
+    category: mongoose.Schema.ObjectId
 });
 
 

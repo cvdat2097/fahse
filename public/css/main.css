@@ -1140,8 +1140,7 @@ li.sale-noti>a {
 }
 
 .side-menu .sub-menu>li {
-  padding-left: 12px;
-  padding-top:
+  padding-left: 12px;  
 }
 
 .side-menu .sub-menu a:hover {
@@ -2440,4 +2439,14 @@ input.num-product::-webkit-outer-spin-button, input.num-product::-webkit-inner-s
 
 .block2-txt {
   padding-top: 5px;
+}
+
+/* SEARCH BAR  */
+#search-textbox {
+  border: 1px solid #222222;
+  height: 34px ;
+  margin-right: 20px;
+}
+#search-textbox input {
+  height: inherit ;
 }

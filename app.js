@@ -1,5 +1,5 @@
 var CONST = require('./config.js')
-
+const exphbs  = require('express-handlebars');
 var createError = require('http-errors');
 var express = require('express');
 var path = require('path');
@@ -10,6 +10,7 @@ var session = require('express-session');
 
 var indexRouter = require('./routes/index');
 var productRouter = require('./routes/product');
+var productListRouter = require('./routes/product-list');
 var filterRouter = require('./routes/filter');
 var adminRouter = require('./routes/admin');
 var loginRouter = require('./routes/login');
@@ -27,10 +28,21 @@ mongoose.connection.on('error', console.error.bind(console, 'MongoDB connection 
 
 // view engine setup
 app.set('views','./views');
-app.set('view engine', 'hbs');
-app.use(session({
-  secret: 'Do an 10 diem nhe'
+app.engine('.hbs', exphbs({
+  defaultLayout: 'layout.hbs',
+  extname: '.hbs',
+  helpers: require('./views/helpers/helpers') 
 }));
+app.set('view engine', 'hbs');
+
+
+
+app.use(session({
+  secret: 'sdfl$lkdjflK$lkjdf@L@Klkdjf4',
+  resave: false,
+  saveUninitialized: false,
+  cookie: { secure: true }
+}))
 
 
 app.use(logger('dev'));
@@ -42,6 +54,7 @@ app.use(express.static(path.join(__dirname, 'public')));
 app.use('/', indexRouter);
 app.use('/index.html', indexRouter);
 app.use('/product.html', productRouter);
+app.use('/product-list.html', productListRouter);
 app.use('/filter.html', filterRouter);
 app.use('/admin.html',adminRouter);
 app.use('/login.html',loginRouter);

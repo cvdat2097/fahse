@@ -7,7 +7,6 @@ const categorySchema = new mongoose.Schema({
 });
 
 const productSchema = new mongoose.Schema({
-    id: String,
     name: String,
     price: Number,
     description: String,
@@ -22,7 +21,9 @@ const productSchema = new mongoose.Schema({
         type: Number,
         default: 0
     },
-    category: mongoose.Schema.ObjectId
+    category: [mongoose.Schema.ObjectId],
+    relatedProducts: [],
+    comment: []
 });
 
 var userSchema = new mongoose.Schema({
@@ -36,7 +37,12 @@ var userSchema = new mongoose.Schema({
     name: String,
     email: String,
     phone: String,
-    address: String
+    address: String,
+    emailIsActivated: {
+        type: Boolean,
+        default: false
+    },
+    emailActivationCode: String
 });
 
 var orderSchema = new mongoose.Schema({
@@ -45,21 +51,16 @@ var orderSchema = new mongoose.Schema({
         enum: ['pending', 'delivering', 'delivered']
     },
     user: mongoose.Schema.ObjectId,
-    productList: {
-        type: [String]
-    },
-    size: [String],
-    color: [String],
+    detail: [],
     note: String,
     recipientName: String,
     address: String,
     phone: String
 });
 
-var commentSchema = new mongoose.Schema({
-    username: String,
-    content: String,
-    date: Date
+var cartSchema = new mongoose.Schema({
+    session: String,
+    detail: []
 });
 
 // Tao model
@@ -67,9 +68,15 @@ const Category = mongoose.model('Category', categorySchema);
 const Product = mongoose.model('Product', productSchema);
 const User = mongoose.model('User', userSchema);
 const Order = mongoose.model('Order', orderSchema);
-const Comment = mongoose.model('Comment', commentSchema);
+const Cart = mongoose.model('Cart', cartSchema);
 
 function CreateUser(type, username, password, name, email, phone, address, callback) {
+    var text = "";
+    var possible = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+
+    for (var i = 0; i < 10; i++)
+        text += possible.charAt(Math.floor(Math.random() * possible.length));
+
     User.create({
         type: type,
         username: username,
@@ -77,7 +84,8 @@ function CreateUser(type, username, password, name, email, phone, address, callb
         name: name,
         email: email,
         phone: phone,
-        address: address
+        address: address,
+        emailActivationCode: text
     }, function (err) {
         if (err) {
             console.log(err);
@@ -99,15 +107,17 @@ function CreateCategory(name, callback) {
         }
     });
 }
-function CreateProduct(name, price, description, color, images, category, callback) {
+function CreateProduct(name, price, description, color, images, category, relatedProducts, comment, callback) {
     Product.create({
         name: name,
-        price,
-        description,
+        price: price,
+        description: description,
         size: ["S", "M", "L", "XL", "XXL"],
-        color,
-        images,
-        category
+        color: color,
+        images: images,
+        category: category,
+        relatedProducts: relatedProducts,
+        comment: comment
     }, function (err) {
         if (err) {
             console.log(err);
@@ -117,13 +127,11 @@ function CreateProduct(name, price, description, color, images, category, callba
         }
     });
 }
-function CreateOrder(status, user, productList, size, color, note, recipientName, address, phone, callback) {
+function CreateOrder(status, user, detail, note, recipientName, address, phone, callback) {
     Order.create({
         status: status,
         user: user,
-        productList: productList,
-        size: size,
-        color: color,
+        detail: detail,
         note: note,
         recipientName: recipientName,
         address: address,
@@ -137,12 +145,27 @@ function CreateOrder(status, user, productList, size, color, note, recipientName
         }
     });
 }
+function CreateCart(session, detail, callback) {
+    Cart.create({
+        _id: new mongoose.Types.ObjectId(session),
+        session: session,
+        detail: detail
+    }, function (err) {
+        if (err) {
+            console.log(err);
+        } else {
+            console.log("Cart created");
+            callback();
+        }
+    });
+}
+
 
 // Array
 var userList = [];
 var categoryList = [];
 var productList = [];
-var commentList = [];
+var cartList = [];
 
 //Them du lieu vao
 async.series([
@@ -167,16 +190,44 @@ async.series([
 
     // Create users
     function (callback) {
-        CreateUser('admin', 'admin', '123', 'Nguyen Van Admin', 'admin@gmail.com', '0123456789', 'Ho Chi Minh City', callback);
+        CreateUser('admin',
+            'admin',
+            '123',
+            'Nguyen Van Admin',
+            'admin@gmail.com',
+            '0123456789',
+            'Ho Chi Minh City',
+            callback);
     },
     function (callback) {
-        CreateUser('customer', 'user1', '123', 'Nguyen Van A', 'nguyenvanA@gmail.com', '+84123456789', 'Ho Chi Minh City', callback);
+        CreateUser('customer',
+            'user1',
+            '123',
+            'Nguyen Van A',
+            'nguyenvanA@gmail.com',
+            '+84123456789',
+            'Ho Chi Minh City',
+            callback);
     },
     function (callback) {
-        CreateUser('customer', 'user2', '123', 'Nguyen Van B', 'nguyenvanB@gmail.com', '+84123456789', 'Ho Chi Minh City', callback);
+        CreateUser('customer',
+            'user2',
+            '123',
+            'Nguyen Van B',
+            'nguyenvanB@gmail.com',
+            '+84123456789',
+            'Ho Chi Minh City',
+            callback);
     },
     function (callback) {
-        CreateUser('customer', 'user3', '123', 'Nguyen Van C', 'nguyenvanC@gmail.com', '+84123456789', 'Ha Noi', callback);
+        CreateUser('customer',
+            'user3',
+            '123',
+            'Nguyen Van C',
+            'nguyenvanC@gmail.com',
+            '+84123456789',
+            'Ha Noi',
+            callback);
     },
     function (callback) {
         User.find({}, function (err, result) {
@@ -192,12 +243,13 @@ async.series([
 
     // Create Category
     function (callback) {
-        CreateCategory("Áo khoác Nam", callback);
+        CreateCategory("Áo khoác Nam",
+            callback);
     },
     function (callback) {
-        CreateCategory("Áo khoác Nữ", callback);
+        CreateCategory("Áo khoác Nữ",
+            callback);
     },
-
     function (callback) {
         Category.find({}, function (err, result) {
             if (err) {
@@ -214,11 +266,13 @@ async.series([
     function (callback) {
         CreateProduct(
             "Áo Khoác Nữ Adachi Thun X01",
-            271946,
+            199000,
             "Áo thun đậm chất nữ tính phù hợp cho các bạn nữ khi ra ngoài",
             ["Đỏ Cam", "Hồng Đậm", "Xanh Trong Trắng"],
             ["images/product/AK_AD_0000_0.jpg", "images/product/AK_AD_0000_1.jpg", "images/product/AK_AD_0000_2.jpg"],
             categoryList[1],
+            [],
+            [],
             callback);
     },
     function (callback) {
@@ -229,6 +283,8 @@ async.series([
             ["Đen", "Trắng", "Xanh Cổ Vịt"],
             ["images/product/AK_AD_0001_0.jpg", "images/product/AK_AD_0001_1.jpg", "images/product/AK_AD_0001_2.jpg"],
             categoryList[0],
+            [],
+            [],
             callback);
     },
     function (callback) {
@@ -239,6 +295,8 @@ async.series([
             ["Đen", "Trắng", "Xanh Cổ Vịt"],
             ["images/product/AK_AD_0002_0.jpg", "images/product/AK_AD_0002_1.jpg", "images/product/AK_AD_0002_2.jpg"],
             categoryList[0],
+            [],
+            [],
             callback);
     },
     function (callback) {
@@ -249,6 +307,8 @@ async.series([
             ["Xám Trắng", "Tím Tối", "Xanh Chàm"],
             ["images/product/AK_AD_0003_0.jpg", "images/product/AK_AD_0003_1.jpg", "images/product/AK_AD_0003_2.jpg"],
             categoryList[1],
+            [],
+            [],
             callback);
     },
     function (callback) {
@@ -259,6 +319,8 @@ async.series([
             ["Xanh Lính", "Đỏ Đen", "Râm Đen"],
             ["images/product/AK_AD_0004_0.jpg", "images/product/AK_AD_0004_1.jpg", "images/product/AK_AD_0004_2.jpg"],
             categoryList[1],
+            [],
+            [],
             callback);
     },
     function (callback) {
@@ -269,6 +331,8 @@ async.series([
             ["Xanh Lính", "Xanh Dương", "Xám Trắng"],
             ["images/product/AK_AD_0005_0.jpg", "images/product/AK_AD_0005_1.jpg", "images/product/AK_AD_0005_2.jpg"],
             categoryList[0],
+            [],
+            [],
             callback);
     },
     function (callback) {
@@ -279,6 +343,8 @@ async.series([
             ["Đen", "Xanh Bóng", "Xanh Đen"],
             ["images/product/AK_AD_0006_0.jpg", "images/product/AK_AD_0006_1.jpg", "images/product/AK_AD_0006_2.jpg"],
             categoryList[1],
+            [],
+            [],
             callback);
     },
     function (callback) {
@@ -289,6 +355,8 @@ async.series([
             ["Xanh Ngọc", "Xanh Riêu", "Xám Trắng"],
             ["images/product/AK_AD_0008_0.jpg", "images/product/AK_AD_0008_1.jpg", "images/product/AK_AD_0008_2.jpg"],
             categoryList[0],
+            [],
+            [],
             callback);
     },
     function (callback) {
@@ -299,6 +367,8 @@ async.series([
             ["Xanh Dương", "Xanh Lá Cây", "Xanh Ngọc"],
             ["images/product/AK_AD_0009_0.jpg", "images/product/AK_AD_0009_1.jpg", "images/product/AK_AD_0009_2.jpg"],
             categoryList[1],
+            [],
+            [],
             callback);
     },
     function (callback) {
@@ -309,6 +379,8 @@ async.series([
             ["Cam", "Đen", "Xanh Riêu"],
             ["images/product/AK_AD_0010_0.jpg", "images/product/AK_AD_0010_1.jpg", "images/product/AK_AD_0010_2.jpg"],
             categoryList[0],
+            [],
+            [],
             callback);
     },
     function (callback) {
@@ -319,6 +391,8 @@ async.series([
             ["Đen", "Xanh Bóng", "Xanh Đen"],
             ["images/product/AK_AD_0006_0.jpg", "images/product/AK_AD_0006_1.jpg", "images/product/AK_AD_0006_2.jpg"],
             categoryList[1],
+            [],
+            [],
             callback);
     },
     function (callback) {
@@ -329,6 +403,8 @@ async.series([
             ["Xanh Ngọc", "Xanh Riêu", "Xám Trắng"],
             ["images/product/AK_AD_0008_0.jpg", "images/product/AK_AD_0008_1.jpg", "images/product/AK_AD_0008_2.jpg"],
             categoryList[0],
+            [],
+            [],
             callback);
     },
     function (callback) {
@@ -339,6 +415,8 @@ async.series([
             ["Xanh Dương", "Xanh Lá Cây", "Xanh Ngọc"],
             ["images/product/AK_AD_0009_0.jpg", "images/product/AK_AD_0009_1.jpg", "images/product/AK_AD_0009_2.jpg"],
             categoryList[1],
+            [],
+            [],
             callback);
     },
     function (callback) {
@@ -349,6 +427,8 @@ async.series([
             ["Cam", "Đen", "Xanh Riêu"],
             ["images/product/AK_AD_0010_0.jpg", "images/product/AK_AD_0010_1.jpg", "images/product/AK_AD_0010_2.jpg"],
             categoryList[0],
+            [],
+            [],
             callback);
     },
     function (callback) {
@@ -359,6 +439,8 @@ async.series([
             ["Đen", "Xanh Bóng", "Xanh Đen"],
             ["images/product/AK_AD_0006_0.jpg", "images/product/AK_AD_0006_1.jpg", "images/product/AK_AD_0006_2.jpg"],
             categoryList[1],
+            [],
+            [],
             callback);
     },
     function (callback) {
@@ -369,6 +451,8 @@ async.series([
             ["Xanh Ngọc", "Xanh Riêu", "Xám Trắng"],
             ["images/product/AK_AD_0008_0.jpg", "images/product/AK_AD_0008_1.jpg", "images/product/AK_AD_0008_2.jpg"],
             categoryList[0],
+            [],
+            [],
             callback);
     },
     function (callback) {
@@ -379,6 +463,8 @@ async.series([
             ["Xanh Dương", "Xanh Lá Cây", "Xanh Ngọc"],
             ["images/product/AK_AD_0009_0.jpg", "images/product/AK_AD_0009_1.jpg", "images/product/AK_AD_0009_2.jpg"],
             categoryList[1],
+            [],
+            [],
             callback);
     },
     function (callback) {
@@ -389,6 +475,8 @@ async.series([
             ["Cam", "Đen", "Xanh Riêu"],
             ["images/product/AK_AD_0010_0.jpg", "images/product/AK_AD_0010_1.jpg", "images/product/AK_AD_0010_2.jpg"],
             categoryList[0],
+            [],
+            [],
             callback);
     },
     function (callback) {
@@ -399,6 +487,8 @@ async.series([
             ["Đen", "Xanh Bóng", "Xanh Đen"],
             ["images/product/AK_AD_0006_0.jpg", "images/product/AK_AD_0006_1.jpg", "images/product/AK_AD_0006_2.jpg"],
             categoryList[1],
+            [],
+            [],
             callback);
     },
     function (callback) {
@@ -409,6 +499,8 @@ async.series([
             ["Xanh Ngọc", "Xanh Riêu", "Xám Trắng"],
             ["images/product/AK_AD_0008_0.jpg", "images/product/AK_AD_0008_1.jpg", "images/product/AK_AD_0008_2.jpg"],
             categoryList[0],
+            [],
+            [],
             callback);
     },
     function (callback) {
@@ -419,6 +511,8 @@ async.series([
             ["Xanh Dương", "Xanh Lá Cây", "Xanh Ngọc"],
             ["images/product/AK_AD_0009_0.jpg", "images/product/AK_AD_0009_1.jpg", "images/product/AK_AD_0009_2.jpg"],
             categoryList[1],
+            [],
+            [],
             callback);
     },
     function (callback) {
@@ -429,6 +523,8 @@ async.series([
             ["Cam", "Đen", "Xanh Riêu"],
             ["images/product/AK_AD_0010_0.jpg", "images/product/AK_AD_0010_1.jpg", "images/product/AK_AD_0010_2.jpg"],
             categoryList[0],
+            [],
+            [],
             callback);
     },
     function (callback) {
@@ -439,6 +535,8 @@ async.series([
             ["Đen", "Xanh Bóng", "Xanh Đen"],
             ["images/product/AK_AD_0006_0.jpg", "images/product/AK_AD_0006_1.jpg", "images/product/AK_AD_0006_2.jpg"],
             categoryList[1],
+            [],
+            [],
             callback);
     },
     function (callback) {
@@ -449,6 +547,8 @@ async.series([
             ["Xanh Ngọc", "Xanh Riêu", "Xám Trắng"],
             ["images/product/AK_AD_0008_0.jpg", "images/product/AK_AD_0008_1.jpg", "images/product/AK_AD_0008_2.jpg"],
             categoryList[0],
+            [],
+            [],
             callback);
     },
     function (callback) {
@@ -459,6 +559,8 @@ async.series([
             ["Xanh Dương", "Xanh Lá Cây", "Xanh Ngọc"],
             ["images/product/AK_AD_0009_0.jpg", "images/product/AK_AD_0009_1.jpg", "images/product/AK_AD_0009_2.jpg"],
             categoryList[1],
+            [],
+            [],
             callback);
     },
     function (callback) {
@@ -469,8 +571,11 @@ async.series([
             ["Cam", "Đen", "Xanh Riêu"],
             ["images/product/AK_AD_0010_0.jpg", "images/product/AK_AD_0010_1.jpg", "images/product/AK_AD_0010_2.jpg"],
             categoryList[0],
+            [],
+            [],
             callback);
     },
+    // ================================ Product list
     function (callback) {
         Product.find({}, function (err, result) {
             if (err) {
@@ -481,6 +586,20 @@ async.series([
             }
         })
     },
+    // ================================ Product list
+    function (callback) {
+        CreateProduct(
+            "**Áo Khoác Nam Adachi Kaki F09",
+            278982,
+            " Một thiết kế của YaMe với những Slogan hiện đại, kiểu dáng trẻ trung cùng nhiều tính năng nhỏ tiện lợi. Chất liệu kaki với ưu điểm cực bền màu, ít co giãn nên giữ được phom dáng qua thời gian sử dụng khá lâu.",
+            ["Cam", "Đen", "Xanh Riêu"],
+            ["images/product/AK_AD_0010_0.jpg", "images/product/AK_AD_0010_1.jpg", "images/product/AK_AD_0010_2.jpg"],
+            categoryList[0],
+            [{ product: productList[0]._id, time: 12 }, { product: productList[2], time: 15 }],
+            [{ username: 'username001', content: 'San pham nay chat luong lam', date: '12/12/2017' },
+            { username: 'username002', content: 'Tui rat thich san pham nay', date: '17/10/2017' }],
+            callback);
+    },
 
 
     // Create Order
@@ -488,10 +607,9 @@ async.series([
         CreateOrder(
             'pending',
             userList[1],
-            [productList[0], productList[1]],
-            ["XL", "S"],
-            [productList[0].color[0],productList[1].color[1]],
-            "Khong",
+            [{ product: productList[0]._id, quantity: 2, color: productList[0].color[0], size: productList[0].size[1] },
+            { product: productList[1]._id, quantity: 3, color: productList[1].color[1], size: productList[1].size[0] },],
+            "Giao hàng buổi sáng nhé. Giao buổi tối không nhận",
             'Tran Thi A',
             'Da Nang',
             '+8416548984',
@@ -500,26 +618,24 @@ async.series([
     function (callback) {
         CreateOrder(
             'delivering',
-            userList[2],
-            [productList[2], productList[3], productList[1]],
-            ["XL", "S"],
-            [productList[2].color[1],productList[3].color[1],productList[1].color[0]],
-            "Khong",
-            'Tran Thi B',
-            'Gia Lai',
+            userList[1],
+            [{ product: productList[0]._id, quantity: 2, color: productList[0].color[0], size: productList[0].size[1] },
+            { product: productList[1]._id, quantity: 3, color: productList[1].color[1], size: productList[1].size[0] },],
+            "Giao hàng buổi sáng nhé. Giao buổi tối không nhận",
+            'Tran Thi A',
+            'Da Nang',
             '+8416548984',
             callback);
     },
     function (callback) {
         CreateOrder(
             'delivered',
-            userList[2],
-            [productList[2], productList[3], productList[1]],
-            ["XL", "S"],
-            [productList[2].color[1],productList[3].color[1],productList[1].color[0]],
-            "Khong",
-            'Tran Thi C',
-            'Go Vap',
+            userList[1],
+            [{ product: productList[0]._id, quantity: 2, color: productList[0].color[0], size: productList[0].size[1] },
+            { product: productList[1]._id, quantity: 3, color: productList[1].color[1], size: productList[1].size[0] },],
+            "Giao hàng buổi sáng nhé. Giao buổi tối không nhận",
+            'Tran Thi A',
+            'Da Nang',
             '+8416548984',
             callback);
     },
@@ -535,9 +651,29 @@ async.series([
     },
 
 
+    // Create cart
+    function (callback) {
+        CreateCart('5b0552c4ed62522ad8194399',
+        [{product: productList[0]._id, quantity: 1, color: productList[0].color[0],size: productList[0].size[0]},
+        {product: productList[1]._id, quantity: 2, color: productList[1].color[0],size: productList[1].size[0]}],
+        callback);
+    },
+    function (callback) {
+        Cart.find({}, function (err, result) {
+            if (err) {
+                console.log('ERROR HERE');
+                console.log(err);
+            } else {
+                cartList = result;
+                callback();
+            }
+        })
+    },
+
     function (callback) {
         mongoose.connection.close(function () {
             console.log('Update database successfully!');
+            callback();
         });
     }
 ]);

@@ -11,7 +11,12 @@ var userSchema = new mongoose.Schema({
     name: String,
     email: String,
     phone: String,
-    address: String
+    address: String,
+    emailIsActivated: {
+        type: Boolean,
+        default: false
+    },
+    emailActivationCode: String
 });
 
 // Export Model

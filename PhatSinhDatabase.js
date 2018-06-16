@@ -595,7 +595,7 @@ async.series([
             ["Cam", "Đen", "Xanh Riêu"],
             ["images/product/AK_AD_0010_0.jpg", "images/product/AK_AD_0010_1.jpg", "images/product/AK_AD_0010_2.jpg"],
             categoryList[0],
-            [{ product: productList[0]._id, time: 12 }, { product: productList[2], time: 15 }],
+            [{ product: productList[0]._id, time: 12 }, { product: productList[2]._id, time: 15 }],
             [{ username: 'username001', content: 'San pham nay chat luong lam', date: '12/12/2017' },
             { username: 'username002', content: 'Tui rat thich san pham nay', date: '17/10/2017' }],
             callback);

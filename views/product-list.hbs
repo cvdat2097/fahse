@@ -24,7 +24,7 @@
 						<ul class="p-b-54">
 							{{#each categoryList}}
 							<li class="p-t-4">
-								<a href="#" class="s-text13 active1">
+								<a href="/filter.html?category={{this._id}}" class="s-text13 active1">
 									{{this.name}}
 								</a>
 							</li>
@@ -185,7 +185,8 @@
 
 					<!-- Pagination -->
 					<div class="pagination flex-m flex-w p-t-26">
-						{{#paginate nPage currentPage}} {{/paginate}}
+						{{#paginate nPage currentPage}}
+						{{/paginate}}
 					</div>
 				</div>
 			</div>

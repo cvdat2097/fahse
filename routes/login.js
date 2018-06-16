@@ -3,6 +3,7 @@ var async = require('async');
 var router = express.Router();
 var lib = require('./lib');
 var Admin = require('../models/adminModel.js');
+var User = require('../models/userModel.js');
 
 router.post('/', function (req, res, next) {
     var username = req.body['user'];
@@ -10,7 +11,7 @@ router.post('/', function (req, res, next) {
 
     var loggedIn = false;
 
-    Admin.find({}, function (err, adminList) {
+    User.find({}, function (err, adminList) {
         if (adminList.length > 0) {
             var i;
             for (i = 0; i < adminList.length; i++) {

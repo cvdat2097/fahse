@@ -1,6 +1,9 @@
+var CONST = require('../config');
+
 var express = require('express');
 var async = require('async');
 var router = express.Router();
+var business = require('../controller/business');
 
 
 // Get product list
@@ -15,39 +18,34 @@ router.get('/', function (req, res, next) {
 
     async.series([
         function (cb) {
-            Product.find({}, function (err, products) {
-                for (var x of products) {
-                    if (x.category[0] == req.param('category')) {
-                        productList.push(x);
-                    }
+            business.GetAllCategory(function (result) {
+                if (result != undefined) {
+                    categoryList = result;
+                    cb();
                 }
-                cb();
             });
         },
 
+        // ROUTING
         function (cb) {
-            Category.find({}, function (err, categories) {
-                categoryList = categories;
+            var optionObj = {};
+            var categoryID = req.param('category');
+            var pageIndex = req.param('currentPage') ? req.param('currentPage') : 1;
 
-                for (var x of categoryList) {
-                    if (x._id.toString() == req.param('category')) {
-                        listName = x.name;
-                    }
-                }
+            business.GetProductByCategoryID(categoryID, pageIndex, function (products, nProducts) {
+                optionObj.productList = products;
+                optionObj.categoryList = categoryList;
+                optionObj.nPage = Math.floor(nProducts / CONST.PRODUCT_PER_PAGE) + 1;
+                optionObj.currentPage = pageIndex;
+
+
+                res.render('product-list', optionObj);
 
                 cb();
             });
-        },
-
-        function (cb) {
-            res.render('index', {
-                productList: productList,
-                categoryList: categoryList,
-                listName: listName
-            });
-            cb();
         }
     ]);
+
 })
 
 module.exports = router;

@@ -1,4 +1,5 @@
 var async = require('async');
+const mongoose = require('mongoose');
 var Category = require('../models/categoryModel.js');
 var Product = require('../models/productModel.js');
 var CONST = require('../config');
@@ -24,11 +25,26 @@ function GetProductByPageIndex(pageIndex, callback) {
         } else {
             var nProducts = products.length;
             products = products.slice(CONST.PRODUCT_PER_PAGE * (this.pageIndex - 1),
-            CONST.PRODUCT_PER_PAGE * this.pageIndex);
-            
+                CONST.PRODUCT_PER_PAGE * this.pageIndex);
+
             return callback(products, nProducts);
         }
-    }.bind({pageIndex: pageIndex}));
+    }.bind({ pageIndex: pageIndex }));
+}
+
+// Get product by category id
+function GetProductByCategoryID(categoryID, pageIndex, callback) {
+    Product.find({ category: new mongoose.Types.ObjectId(categoryID) }, function (err, products) {
+        if (err) {
+            console.log(err);
+        } else {
+            var nProducts = products.length;
+            products = products.slice(CONST.PRODUCT_PER_PAGE * (this.pageIndex - 1),
+                CONST.PRODUCT_PER_PAGE * this.pageIndex);
+
+            return callback(products, nProducts);
+        }
+    }.bind({ categoryID: categoryID, pageIndex: pageIndex }));
 }
 
 // Get all category
@@ -43,10 +59,10 @@ function GetAllCategory(callback) {
 }
 
 
-
 var exportObj = {
     GetAllProduct: GetAllProduct,
     GetProductByPageIndex: GetProductByPageIndex,
+    GetProductByCategoryID: GetProductByCategoryID,
     GetAllCategory: GetAllCategory
 };
 

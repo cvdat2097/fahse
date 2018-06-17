@@ -15,6 +15,7 @@ var filterRouter = require('./routes/filter');
 var adminRouter = require('./routes/admin');
 var loginRouter = require('./routes/login');
 var logoutRouter = require('./routes/logout');
+var test = require('./routes/test');
 
 var app = express();
 app.use(bodyParser.json());
@@ -52,13 +53,14 @@ app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
 
 app.use('/', indexRouter);
-app.use('/index.html', indexRouter);
+app.use('/index.html', indexRouter);//
 app.use('/product.html', productRouter);
-app.use('/product-list.html', productListRouter);
+app.use('/product-list.html', productListRouter);//
 app.use('/filter.html', filterRouter);
 app.use('/admin.html',adminRouter);
-app.use('/login.html',loginRouter);
+app.use('/login.html',loginRouter);//
 app.use('/logout.html',logoutRouter);
+app.use('/test.html',test);
 
 
 // catch 404 and forward to error handler

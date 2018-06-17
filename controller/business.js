@@ -58,6 +58,15 @@ function GetAllCategory(callback) {
     });
 }
 
+function GetRelatedProduct(productID, topN, callback){
+    Product.find({},function(err, products){
+        if(err){
+            console.log(err);
+        }else{
+            return callback(products);
+        }
+    });
+}
 
 var exportObj = {
     GetAllProduct: GetAllProduct,

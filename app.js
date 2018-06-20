@@ -61,9 +61,8 @@ app.use('/login.html',loginRouter);
 app.use('/logout.html',logoutRouter);
 
 // ============= DEBUG DAL.js
-var dalRouter = require('./models/DAL');
-app.use('/dal.html',dalRouter);
-
+// var dalRouter = require('./models/DAL');
+// app.use('/dal.html',dalRouter);
 // ============= DEBUG DAL.js
 
 

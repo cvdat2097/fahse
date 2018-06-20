@@ -39,7 +39,8 @@ router.get('/', function (req, res, next) {
                 size: req.param('size'),
                 color: req.param('color'),
                 price: req.param('price'),
-                keyword: req.param('keyword')
+                keyword: req.param('keyword'),
+                sorting: req.param('sorting')
             }
 
 
@@ -62,9 +63,10 @@ router.get('/', function (req, res, next) {
 // ============== DEBUG DAL.js ============
 
 // 3.1.1
-function QueryProducts(queryObj, callback) {
+function QueryProducts(queryObj, pageIndex, callback) {
 
     var query = {};
+    var sorting;
     async.series([
         function (cb) {
             // build mongoose query object
@@ -92,7 +94,7 @@ function QueryProducts(queryObj, callback) {
                 var temp = [];
 
                 for (var i = 0; i < queryObj.color.length; i++) {
-                    temp[i] = new RegExp(".*" + queryObj.color[i] + ".*","i");
+                    temp[i] = new RegExp(".*" + queryObj.color[i] + ".*", "i");
                 }
 
                 // MongoDB query format
@@ -116,11 +118,28 @@ function QueryProducts(queryObj, callback) {
             }
 
             if (queryObj.keyword != undefined) {
-                
+
                 // MongoDB query format
                 query.name = {
                     $regex: ".*" + queryObj.keyword + ".*",
                     $options: "i"
+                }
+            }
+
+            if (queryObj.sorting != undefined) {
+                switch (queryObj.sorting) {
+                    case "pricelowtohigh":
+                        sorting = function (a, b) { return a.price - b.price }
+                        break;
+                    case "pricehightolow":
+                        sorting = function (a, b) { return b.price - a.price }
+                        break;
+                    case "viewlowtohigh":
+                        sorting = function (a, b) { return a.view - b.view }
+                        break;
+                    case "viewhightolow":
+                        sorting = function (a, b) { return b.view - a.view }
+                        break;
                 }
             }
 
@@ -129,14 +148,27 @@ function QueryProducts(queryObj, callback) {
 
         function (cb) {
             // send query to the database
-            Product.find(query, function (err, products) {
+            var queryFunction;
+            
+            if (pageIndex <= 0)
+            {
+                queryFunction = Product.find(query);
+            } else {
+                queryFunction = Product.find(query).limit(CONST.PRODUCT_PER_PAGE).skip((pageIndex - 1) * CONST.PRODUCT_PER_PAGE);
+            }
+            
+            queryFunction.exec(function (err, products) {
                 if (err) {
                     console.log(err);
                 } else {
                     var returnArray;
 
                     // process array 'products'
-                    returnArray = products;
+                    if (sorting == undefined) {
+                        returnArray = products;
+                    } else {
+                        returnArray = products.sort(sorting);
+                    }
 
                     cb();
                     return callback(returnArray);
@@ -149,5 +181,11 @@ function QueryProducts(queryObj, callback) {
 
 
 // ============== DEBUG DAL.js ============
-module.exports = router;
+// module.exports = router;
 // ============== DEBUG DAL.js ============
+
+var exportObj = {
+    QueryProducts: QueryProducts
+}
+
+module.exports = exportObj;

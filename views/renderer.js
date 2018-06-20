@@ -3,6 +3,7 @@ var Handlebars = require('express-handlebars');
 var async = require('async');
 var business = require('../controller/business');
 var CONST = require('../config');
+var dal = require('../models/DAL');
 
 // Mongoose models
 var Cart = require('../models/cartModel');
@@ -135,14 +136,24 @@ var ProductListPage = {
 
             // ROUTING
             function (cb) {
-                var optionObj = {};
-                var pageIndex = req.param('currentPage') ? req.param('currentPage') : 1;
 
-                business.GetProductByPageIndex(pageIndex, function (products, nProducts) {
-                    optionObj.productList = products;
-                    optionObj.categoryList = categoryList;
-                    optionObj.nPage = Math.floor(nProducts / CONST.PRODUCT_PER_PAGE) + 1;
-                    optionObj.currentPage = pageIndex;
+                var pageIndex = req.param('pageindex');
+                pageIndex = (pageIndex && pageIndex > 0) ? pageIndex : 0;
+
+                queryObj = {
+                    category: req.param('category'),
+                    size: req.param('size'),
+                    color: req.param('color'),
+                    price: req.param('price'),
+                    keyword: req.param('keyword'),
+                    sorting: req.param('sorting')
+                }
+
+                dal.QueryProducts(queryObj, pageIndex, function (products) {
+                    var optionObj = {
+                        productList: products,
+                        categoryList: categoryList
+                    }
 
                     if (req.param('ajax') == 'true') {
                         optionObj.layout = false;
@@ -324,8 +335,6 @@ var AdminPage = {
         res.redirect('/admin.html?table=category');
     }
 }
-
-
 
 
 module.exports.IndexPage = IndexPage;

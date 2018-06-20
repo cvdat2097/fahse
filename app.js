@@ -60,6 +60,12 @@ app.use('/admin.html',adminRouter);
 app.use('/login.html',loginRouter);
 app.use('/logout.html',logoutRouter);
 
+// ============= DEBUG DAL.js
+var dalRouter = require('./models/DAL');
+app.use('/dal.html',dalRouter);
+
+// ============= DEBUG DAL.js
+
 
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {

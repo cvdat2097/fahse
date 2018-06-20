@@ -337,8 +337,6 @@ var AdminPage = {
 }
 
 
-
-
 module.exports.IndexPage = IndexPage;
 module.exports.AdminPage = AdminPage;
 module.exports.LoginPage = LoginPage;

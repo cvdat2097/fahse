@@ -11,7 +11,6 @@ var session = require('express-session');
 var indexRouter = require('./routes/index');
 var productRouter = require('./routes/product');
 var productListRouter = require('./routes/product-list');
-var filterRouter = require('./routes/filter');
 var adminRouter = require('./routes/admin');
 var loginRouter = require('./routes/login');
 var logoutRouter = require('./routes/logout');
@@ -36,14 +35,13 @@ app.engine('.hbs', exphbs({
 app.set('view engine', 'hbs');
 
 
-
+// Session settings
 app.use(session({
-  secret: 'sdfl$lkdjflK$lkjdf@L@Klkdjf4',
-  resave: false,
-  saveUninitialized: false,
-  cookie: { secure: true }
+  secret: 'sdfl$lkdjflK$lkjdf@L@Klkdjf4'
+  // resave: false,
+  // saveUninitialized: false,
+  // cookie: { secure: true }
 }))
-
 
 app.use(logger('dev'));
 app.use(express.json());
@@ -51,14 +49,17 @@ app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
 
+
+// ================= ROUTING ==============
 app.use('/', indexRouter);
 app.use('/index.html', indexRouter);
 app.use('/product.html', productRouter);
 app.use('/product-list.html', productListRouter);
-app.use('/filter.html', filterRouter);
 app.use('/admin.html',adminRouter);
 app.use('/login.html',loginRouter);
 app.use('/logout.html',logoutRouter);
+// ================= ROUTING ==============
+
 
 // ============= DEBUG DAL.js
 // var dalRouter = require('./models/DAL');

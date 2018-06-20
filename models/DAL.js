@@ -6,61 +6,27 @@ var CONST = require('../config');
 var mongoose = require('mongoose');
 var Category = require('../models/categoryModel.js');
 var Product = require('../models/productModel.js');
+var Order = require('../models/orderModel.js');
+var User = require('../models/userModel.js');
+var Cart = require('../models/cartModel.js');
 
 // ============== DEBUG DAL.js ============
 router.get('/', function (req, res, next) {
-    var categoryList;
+    var cartSession = "JwnL6i8oCqHZshnijkXbsRyKIA8AJ5dW"
+    var cdetail = {
+        product: new mongoose.Types.ObjectId("5b24f3e1968641237042a01b"),
+        quantity: 500,
+        color: "Do Xanh Tim",
+        size: "XL XS"
+    }
 
-    async.series([
-        function (cb) {
-            business.GetAllCategory(function (result) {
-                if (result != undefined) {
-                    categoryList = result;
-                    cb();
-                }
-            });
-        },
-
-        // ROUTING
-        function (cb) {
-            var optionObj = {};
-            var pageIndex = req.param('currentPage') ? req.param('currentPage') : 1;
-
-            // queryObj = {
-            //     category: "5b24f3df968641237042a00f",
-            //     size: "XL-S-M",
-            //     color: "Do-Cam-XanhLa",
-            //     price: "12000-90000",
-            //     keyword: "áo"
-            // }
-
-            queryObj = {
-                category: req.param('category'),
-                size: req.param('size'),
-                color: req.param('color'),
-                price: req.param('price'),
-                keyword: req.param('keyword'),
-                sorting: req.param('sorting')
-            }
-
-
-            QueryProducts(queryObj, function (products) {
-                var optionObj = {
-                    productList: products
-                }
-                if (req.param('ajax') == 'true') {
-                    optionObj.layout = false;
-                    res.render('product-list', optionObj);
-                } else {
-                    res.render('product-list', optionObj);
-                }
-                cb();
-            });
-        }
-    ]);
-
+    DeleteItemInCart("JwnL6i8oCqHZshnijkXbsRyKIA8AJ5dW", 2, function (success) {
+        console.log(success);
+    })
+    res.send("OK");
 });
 // ============== DEBUG DAL.js ============
+
 
 // 3.1.1
 function QueryProducts(queryObj, pageIndex, callback) {
@@ -149,14 +115,13 @@ function QueryProducts(queryObj, pageIndex, callback) {
         function (cb) {
             // send query to the database
             var queryFunction;
-            
-            if (pageIndex <= 0)
-            {
+
+            if (pageIndex <= 0) {
                 queryFunction = Product.find(query);
             } else {
                 queryFunction = Product.find(query).limit(CONST.PRODUCT_PER_PAGE).skip((pageIndex - 1) * CONST.PRODUCT_PER_PAGE);
             }
-            
+
             queryFunction.exec(function (err, products) {
                 if (err) {
                     console.log(err);
@@ -178,6 +143,343 @@ function QueryProducts(queryObj, pageIndex, callback) {
         }
     ]);
 }
+
+// 3.1.2
+function QueryRelatedProducts(productID, topN, callback) {
+    var queryFunction = Product.findOne({ _id: new mongoose.Types.ObjectId(productID) }, { relatedProducts: 1 });
+
+    queryFunction.exec(function (err, result) {
+        if (err) {
+            console.log(err);
+        } else {
+            return callback(result.relatedProducts.slice(0, topN));
+        }
+    });
+}
+
+// 3.1.3
+function QueryProductComments(productID, pageIndex, callback) {
+    if (pageIndex <= 0) {
+        pageIndex = 0;
+    }
+
+    var queryFunction;
+
+    if (pageIndex > 0) {
+        queryFunction = Product.findOne({ _id: new mongoose.Types.ObjectId(productID) }, {
+            comment: {
+                $slice: [CONST.COMMENT_PER_PAGE * (pageIndex - 1), CONST.COMMENT_PER_PAGE]
+            }
+        });
+    } else {
+        queryFunction = Product.findOne({ _id: new mongoose.Types.ObjectId(productID) }, {
+            comment: 1
+        });
+    }
+
+    queryFunction.exec(function (err, result) {
+        if (err) {
+            console.log(err);
+        } else {
+            return callback(result.comment);
+        }
+    });
+}
+
+// 3.1.4
+function InsertProductComments(productID, comment, callback) {
+    if (!comment.username || !comment.content || !comment.date) {
+        console.log("ERR: Comment is empty");
+        return callback(false);
+    }
+
+    Product.update(
+        { _id: new mongoose.Types.ObjectId(productID) },
+        { $push: { comment: comment } }, function (err) {
+            if (err) {
+                console.log(err);
+                return callback(false);
+            } else {
+                return callback(true);
+            }
+        }
+    )
+}
+
+// 3.1.5
+function CreateCart(sessionID, callback) {
+    if (sessionID !== "") {
+        Cart.create({
+            session: sessionID
+        }, function (err) {
+            if (err) {
+                console.log(err);
+                callback(false);
+            } else {
+                console.log("Cart created");
+                callback(true);
+            }
+        });
+    }
+}
+
+// 3.1.6
+function QueryCart(sessionID, callback) {
+    if (sessionID) {
+        Cart.findOne({ session: sessionID }).exec(function (err, cart) {
+            if (err) {
+                console.log(err);
+                callback(null);
+            } else {
+                callback(cart, cart.detail.length);
+            }
+        });
+    } else {
+        console.log("ERR QueryCart: sessionID is invalid");
+        callback(null);
+    }
+}
+
+// 3.1.7
+function InsertItemToCart(sessionID, newCartDetail, callback) {
+    if (!newCartDetail || !newCartDetail.product || !newCartDetail.quantity || !newCartDetail.color
+        || !newCartDetail.size) {
+        console.log("ERR: CartDetail is in wrong format");
+        return callback(false);
+    }
+
+
+    // Check sessionID is valid or not
+    Cart.findOne({ session: sessionID }, function (err, res) {
+        if (err) {
+            console.log(err)
+        } else {
+            if (!res) {
+                return callback(false)
+            } else {
+                Cart.update(
+                    { session: sessionID },
+                    { $push: { detail: newCartDetail } }, function (err) {
+                        if (err) {
+                            console.log(err);
+                            return callback(false);
+                        } else {
+                            return callback(true);
+                        }
+                    }
+                )
+            }
+        }
+    })
+
+
+}
+
+// 3.1.8
+function UpdateItemInCart(sessionID, itemIndex, newCartDetail, callback) {
+    if (!newCartDetail || !newCartDetail.product || !newCartDetail.quantity || !newCartDetail.color
+        || !newCartDetail.size) {
+        console.log("ERR: CartDetail is in wrong format");
+        return callback(false);
+    }
+
+
+    // Check sessionID is valid or not
+    Cart.findOne({ session: sessionID }, function (err, res) {
+        if (err) {
+            console.log(err)
+        } else {
+            if (!res) {
+                return callback(false)
+            } else {
+                var setObj = {};
+                setObj["detail." + itemIndex] = newCartDetail;
+                Cart.update(
+                    { session: sessionID },
+                    {
+                        $set: setObj
+                    }
+                ,function (err) {
+                    if (err) {
+                        console.log(err) 
+                    } else {
+                        callback(true);
+                    }
+                })
+            }
+        }
+    })
+}
+
+// 3.1.9
+function DeleteItemInCart(sessionID, itemIndex, callback) {
+    // Check sessionID is valid or not
+    Cart.findOne({ session: sessionID }, function (err, res) {
+        if (err) {
+            console.log(err)
+        } else {
+            if (!res) {
+                console.log("Cart not found");
+                return callback(false)
+            } else {               
+                var unsetObj = {};
+                unsetObj["detail."+itemIndex] = 1;
+                Cart.update({session: sessionID}, {$unset : unsetObj},function(err) {
+                    if (err) {
+                        console.log(err);
+                        callback(false);
+                    } else {
+                        Cart.update({session: sessionID}, {$pull : {"detail" : null}}, function (err) {
+                            if (err) {
+                                console.log(err);
+                            } else {
+                                callback(true);
+                            }
+
+                        })
+                    }
+                }); 
+                
+            }
+        }
+    })
+}
+
+// 3.1.10
+function CreateUser(newUser, callback) {
+    if (!newUser || !newUser.type || !newUser.username || !newUser.password || !newUser.name || !newUser.email
+        || !newUser.phone || !newUser.address) {
+        console.log("ERR: newUser is in wrong format");
+        return callback(false);
+    }
+
+    // Generate random email activation code
+    var emailCode = "";
+    var possible = CONST.EMAIL_ACTIVATION_KEY;
+
+    for (var i = 0; i < 10; i++) {
+        emailCode += possible.charAt(Math.floor(Math.random() * possible.length));
+    }
+    newUser.emailActivationCode = emailCode;
+
+    User.create(newUser, function (err) {
+        if (err) {
+            console.log(err);
+            callback(false);
+        } else {
+            console.log("User created");
+            callback(true);
+        }
+    });
+}
+
+// 3.1.11
+function QueryUser(username, callback) {
+    if (username == "") {
+        User.find({}, function (err, userFound) {
+            if (err) {
+                console.log(err);
+                callback(undefined);
+            } else {
+                console.log("User found");
+                callback(userFound);
+            }
+        })
+    } else {
+        User.findOne({ username: username }, function (err, userFound) {
+            if (err) {
+                console.log(err);
+                callback(null);
+            } else {
+                console.log("User found");
+                callback(userFound);
+            }
+        })
+    }
+
+
+}
+
+// 3.1.12
+function UpdateUser(username, newUser, callback) {
+    User.findOneAndUpdate({ username: username }, newUser, function (err) {
+        if (err) {
+            console.log(err);
+            callback(false);
+        } else {
+            console.log("User updated successfully");
+            callback(true);
+        }
+    })
+}
+
+// 3.1.13
+function CreateOrder(newOrder, callback) {
+    if (!newOrder || !newOrder.status || !newOrder.user || !newOrder.detail || !newOrder.note
+        || !newOrder.recipientName || !newOrder.address || !newOrder.phone) {
+        console.log("ERR in CreateOrder: newOrder is in wrong format");
+        return callback(false);
+    }
+
+
+    Order.create(newOrder, function (err) {
+        if (err) {
+            console.log(err);
+            callback(false);
+        } else {
+            console.log("Order created");
+            callback(true);
+        }
+    });
+}
+
+// 3.1.14
+function QueryOrder(username, callback) {
+    if (username == "") {
+        Order.find({}, function (err, orders) {
+            if (err) {
+                console.log(err);
+                return callback(null);
+            } else {
+                console.log("Order found");
+                return callback(orders);
+            }
+        })
+    } else {
+        User.findOne({ username: username }, function (err, userFound) {
+            if (err) {
+                console.log(err);
+                return callback(null);
+            } else {
+                if (userFound) {
+                    console.log("User found");
+
+                    var userID = userFound._id;
+
+                    Order.find({ user: userID }, function (err, orders) {
+                        if (err) {
+                            console.log(err);
+                            return callback(null);
+                        } else {
+                            console.log("Order found");
+                            return callback(orders);
+                        }
+                    })
+
+                } else {
+                    console.log("User not found");
+                    return callback(null);
+                }
+            }
+        })
+    }
+}
+
+
+
+
+
+
 
 
 // ============== DEBUG DAL.js ============

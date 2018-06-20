@@ -4,7 +4,7 @@ var renderer = require('../views/renderer');
 
 // Routing
 router.get('/', function (req, res, next) {
-  renderer.AdminPage.RenderAdminPage(req, res, next);
+  renderer.AdminPage.RenderAdminPageGET(req, res, next);
 });
 
 // Edit database

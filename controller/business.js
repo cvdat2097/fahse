@@ -1,61 +1,51 @@
+var express = require('express');
 var async = require('async');
 const mongoose = require('mongoose');
 var Category = require('../models/categoryModel.js');
 var Product = require('../models/productModel.js');
 var CONST = require('../config');
-var result;
+var DAL = require('../models/DAL');
 
+// ============== DEBUG business.js ============
+var router = express.Router();
+router.get('/', function (req, res, next) {
+    GetAllProduct(function (result) {
+        console.log(result);
+    })
+    res.send("OK");
+});
+// ============== DEBUG business.js ============
 
-// Get all product
+// 2.1.1
 function GetAllProduct(callback) {
-    Product.find({}, function (err, products) {
-        if (err) {
-            console.log(err);
-        } else {
-            return callback(products);
-        }
-    });
+    DAL.QueryProducts({}, 0, function (products) {
+        callback(products);
+    })
 }
 
-// Get product by page index
-function GetProductByPageIndex(pageIndex, callback) {
-    Product.find({}, function (err, products, pageIndex) {
-        if (err) {
-            console.log(err);
-        } else {
-            var nProducts = products.length;
-            products = products.slice(CONST.PRODUCT_PER_PAGE * (this.pageIndex - 1),
-                CONST.PRODUCT_PER_PAGE * this.pageIndex);
-
-            return callback(products, nProducts);
-        }
-    }.bind({ pageIndex: pageIndex }));
+// 2.1.2
+function GetProductByPageIndex(queryObj, pageIndex, callback) {
+    DAL.QueryProducts(queryObj, pageIndex, function (products) {
+        callback(products);
+    })
 }
 
 // Get product by category id
 function GetProductByCategoryID(categoryID, pageIndex, callback) {
-    Product.find({ category: new mongoose.Types.ObjectId(categoryID) }, function (err, products) {
-        if (err) {
-            console.log(err);
-        } else {
-            var nProducts = products.length;
-            products = products.slice(CONST.PRODUCT_PER_PAGE * (this.pageIndex - 1),
-                CONST.PRODUCT_PER_PAGE * this.pageIndex);
+    var queryObj = {
+        category: new mongoose.Types.ObjectId(categoryID)
+    }
 
-            return callback(products, nProducts);
-        }
-    }.bind({ categoryID: categoryID, pageIndex: pageIndex }));
+    DAL.QueryProducts(queryObj, pageIndex, function (products) {
+        callback(products);
+    })
 }
 
 // Get all category
 function GetAllCategory(callback) {
-    Category.find({}, function (err, cats) {
-        if (err) {
-            console.log(err);
-        } else {
-            return callback(cats);
-        }
-    });
+    DAL.QueryCategory({}, function (cats) {
+        return callback(cats);
+    })
 }
 
 
@@ -66,4 +56,9 @@ var exportObj = {
     GetAllCategory: GetAllCategory
 };
 
-module.exports = exportObj;
+// module.exports = exportObj;
+
+
+// ============== DEBUG business.js ============
+module.exports = router;
+// ============== DEBUG business.js ============

@@ -299,13 +299,13 @@ function UpdateItemInCart(sessionID, itemIndex, newCartDetail, callback) {
                     {
                         $set: setObj
                     }
-                ,function (err) {
-                    if (err) {
-                        console.log(err) 
-                    } else {
-                        callback(true);
-                    }
-                })
+                    , function (err) {
+                        if (err) {
+                            console.log(err)
+                        } else {
+                            callback(true);
+                        }
+                    })
             }
         }
     })
@@ -321,15 +321,15 @@ function DeleteItemInCart(sessionID, itemIndex, callback) {
             if (!res) {
                 console.log("Cart not found");
                 return callback(false)
-            } else {               
+            } else {
                 var unsetObj = {};
-                unsetObj["detail."+itemIndex] = 1;
-                Cart.update({session: sessionID}, {$unset : unsetObj},function(err) {
+                unsetObj["detail." + itemIndex] = 1;
+                Cart.update({ session: sessionID }, { $unset: unsetObj }, function (err) {
                     if (err) {
                         console.log(err);
                         callback(false);
                     } else {
-                        Cart.update({session: sessionID}, {$pull : {"detail" : null}}, function (err) {
+                        Cart.update({ session: sessionID }, { $pull: { "detail": null } }, function (err) {
                             if (err) {
                                 console.log(err);
                             } else {
@@ -338,8 +338,8 @@ function DeleteItemInCart(sessionID, itemIndex, callback) {
 
                         })
                     }
-                }); 
-                
+                });
+
             }
         }
     })
@@ -475,19 +475,37 @@ function QueryOrder(username, callback) {
     }
 }
 
+// 3.1.15
+function QueryCategory(queryObj, callback) {
+    Category.find(queryObj, function (err, cats) {
+        if (err) {
+            console.log(err);
+        } else {
+            return callback(cats);
+        }
+    });
+}
 
+var exportObj = {
+    QueryProducts: QueryProducts,
+    QueryRelatedProducts: QueryRelatedProducts,
+    QueryProductComments: QueryProductComments,
+    InsertProductComments: InsertProductComments,
+    CreateCart: CreateCart,
+    QueryCart: QueryCart,
+    InsertItemToCart: InsertItemToCart,
+    UpdateItemInCart: UpdateItemInCart,
+    DeleteItemInCart: DeleteItemInCart,
+    CreateUser: CreateUser,
+    QueryUser: QueryUser,
+    UpdateUser: UpdateUser,
+    CreateOrder: CreateOrder,
+    QueryOrder: QueryOrder,
+    QueryCategory: QueryCategory
+}
 
-
-
-
-
+module.exports = exportObj;
 
 // ============== DEBUG DAL.js ============
 // module.exports = router;
 // ============== DEBUG DAL.js ============
-
-var exportObj = {
-    QueryProducts: QueryProducts
-}
-
-module.exports = exportObj;

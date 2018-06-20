@@ -65,7 +65,10 @@ app.use('/logout.html',logoutRouter);
 // var dalRouter = require('./models/DAL');
 // app.use('/dal.html',dalRouter);
 // ============= DEBUG DAL.js
-
+// ============= DEBUG business.js
+var businessRouter = require('./controller/business');
+app.use('/business.html',businessRouter);
+// ============= DEBUG business.js
 
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {

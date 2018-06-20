@@ -149,7 +149,7 @@ var ProductListPage = {
                     sorting: req.param('sorting')
                 }
 
-                dal.QueryProducts(queryObj, pageIndex, function (products) {
+                business.GetProductByPageIndex(queryObj, pageIndex, function (products) {
                     var optionObj = {
                         productList: products,
                         categoryList: categoryList

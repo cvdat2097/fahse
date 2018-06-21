@@ -90,7 +90,7 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
-
+app.use('/admin', express.static(path.join(__dirname, 'public/admin')));
 
 var indexRouter = require('./routes/index');
 var productRouter = require('./routes/product');
@@ -105,11 +105,11 @@ app.use('/', indexRouter);
 app.use('/index.html', indexRouter);
 app.use('/product.html', productRouter);
 app.use('/product-list.html', productListRouter);
-app.use('/admin.html', adminRouter);
 app.use('/login.html', loginRouter);
 app.use('/logout.html', logoutRouter);
 app.use('/checkout.html', checkoutRouter);
 app.use('/cart.html', cartRouter);
+app.use('/admin', adminRouter);
 // ================= ROUTING ==============
 
 

@@ -21,10 +21,10 @@ var IndexPage = {
 
         async.series([
             function (cb) {
-               business.GetTopProducts(10, function (products) {
-                   productList = products;
-                   cb();
-               })
+                business.GetTopProducts(10, function (products) {
+                    productList = products;
+                    cb();
+                })
             },
 
             function (cb) {
@@ -188,7 +188,7 @@ var LoginPage = {
                 for (i = 0; i < adminList.length; i++) {
                     if (adminList[i].username == username && adminList[i].password == pass) {
                         req.session.userid = username;
-                        res.redirect('/admin.html');
+                        res.redirect('/admin');
                         loggedIn = true;
                         break;
                     }
@@ -202,16 +202,17 @@ var LoginPage = {
 
         });
     },
+
     RenderLoginPageGET: function RenderLoginPageGET(req, res, next) {
         if (req.isAuthenticated()) {
             if (req.user.type == 'admin') {
-                res.redirect('/admin.html');
+                res.redirect('/admin');
             } else {
                 res.redirect('/');
             }
         } else {
             // Login faild
-            res.render('', { layout: 'admin/login' });
+            res.render('', { layout: '../login' });
         }
     }
 }
@@ -223,122 +224,38 @@ var RegisterPage = {
 }
 
 var AdminPage = {
-    RenderAdminPageGET: function RenderAdminPageGET(req, res, next) {
-        if (!req.isAuthenticated()) {
-            res.redirect('/login.html');
-            res.end();
-        } else {
-            var table = req.param('table');
-
-            switch (table) {
-                case undefined:
-                    table = 'product';
-                case 'product':
-                    {
-                        Product.find({}, function (err, products) {
-                            console.log(products);
-                            res.render('admin/table-product', { products: products, layout: 'admin/adminlayout' });
-                        });
-                    }
-                    break;
-
-                case 'category':
-                    {
-                        Category.find({}, function (err, cats) {
-                            console.log(cats);
-                            res.render('admin/table-category', { cats: cats, layout: 'admin/adminlayout' });
-                        });
-                    }
-                    break;
+    RenderAdminIndexPageGET: function RenderAdminIndexPageGET(req, res, next) {
+        // if (!req.isAuthenticated() || req.user.type != 'admin') {
+        //     res.redirect('/login.html');
+        //     res.end();
+        // } else 
+        {
+            var optionObj = {
+                layout: 'adminlayout'
             }
+            res.render('admin/index', optionObj)
         }
     },
 
-    RenderAdminPagePOSTProduct: function RenderAdminPagePOSTProduct(req, res, next) {
-        if (req.body['button-add'] == 'product') {
-            var sizeArray = req.body['size'].split(',');
-            var colorArray = req.body['color'].split(',');
-            var imagesArray = req.body['images'].split(',');
-            Product.create({
-                name: req.body['name'],
-                price: req.body['price'],
-                description: req.body['description'],
-                size: sizeArray,
-                color: colorArray,
-                images: imagesArray
-            }, function () {
-                console.log('Create successfully');
-            });
-        }
-
-        if (req.body['button-delete']) {
-            var id = req.body['button-delete'];
-            console.log(id);
-            Product.findOne({ _id: id }, function (err, doc) {
-                if (doc != null) {
-                    doc.remove();
-                    console.log('Remove OK');
+    RenderAdminProductPage: function RenderAdminProductPage(req, res, next) {
+        business.GetAllProduct(function (products) {
+            if (products == null) {
+                res.send("Lỗi: Không thể lấy danh sách sản phẩm");
+            } else {
+                var optionObj = {
+                    layout: 'adminlayout',
+                    products: products
                 }
-            })
-        }
-
-        if (req.body['button-update']) {
-            var id = req.body['button-update'];
-            console.log(id);
-            var updateObj = {
-                name: req.body['name'],
-                price: req.body['price'],
-                description: req.body['description'],
-                size: sizeArray,
-                color: colorArray,
-                images: imagesArray
-            };
-
-            Product.update({ _id: id }, updateObj, function (err) {
-                if (err) {
-                    console.log(err);
-                }
-                console.log('Update OK');
-            });
-        }
-        res.redirect('/admin.html?table=product');
+                res.render('admin/product', optionObj);
+            }
+        })
     },
 
-    RenderAdminPagePOSTCategory: function RenderAdminPagePOSTCategory(req, res, next) {
-        if (req.body['button-add'] == 'category') {
-            Category.create({
-                name: req.body['name'],
-            }, function () {
-                console.log('Create successfully');
-            });
+    RenderAdminCategoryPage: function RenderAdminCategoryPage(req, res, next) {
+        var optionObj = {
+            layout: 'adminlayout'
         }
-
-        if (req.body['button-delete']) {
-            var id = req.body['button-delete'];
-            console.log(id);
-            Category.findOne({ _id: id }, function (err, doc) {
-                if (doc != null) {
-                    doc.remove();
-                    console.log('Remove OK');
-                }
-            })
-        }
-
-        if (req.body['button-update']) {
-            var id = req.body['button-update'];
-            console.log(id);
-            var updateObj = {
-                name: req.body['name'],
-            };
-
-            Category.update({ _id: id }, updateObj, function (err) {
-                if (err) {
-                    console.log(err);
-                }
-                console.log('Update OK');
-            });
-        }
-        res.redirect('/admin.html?table=category');
+        res.render('admin/category', optionObj);
     }
 }
 

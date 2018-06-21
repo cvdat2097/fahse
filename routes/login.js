@@ -26,7 +26,7 @@ router.post('/', function (req, res, next) {
             if (user.type == "customer") {
                 res.redirect('/');
             } else if (user.type == "admin") {
-                res.redirect('/admin.html');
+                res.redirect('/admin');
             }
         } else {
             res.redirect('/login.html')

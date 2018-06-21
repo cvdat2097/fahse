@@ -4,17 +4,20 @@ var renderer = require('../views/renderer');
 
 // Routing
 router.get('/', function (req, res, next) {
-  renderer.AdminPage.RenderAdminPageGET(req, res, next);
+  renderer.AdminPage.RenderAdminIndexPageGET(req, res, next);
+});
+
+router.get('/index.html', function (req, res, next) {
+  renderer.AdminPage.RenderAdminIndexPageGET(req, res, next);
 });
 
 // Edit database
-// ADD
-router.post('/product', function (req, res, next) {
-  renderer.AdminPage.RenderAdminPagePOSTProduct(req, res, next);
+router.get('/product.html', function (req, res, next) {
+  renderer.AdminPage.RenderAdminProductPage(req, res, next);
 });
 
-router.post('/category', function (req, res, next) {
-  renderer.AdminPage.RenderAdminPagePOSTCategory(req,res,next);
+router.get('/category.html', function (req, res, next) {
+  renderer.AdminPage.RenderAdminCategoryPage(req,res,next);
 });
 
 module.exports = router;

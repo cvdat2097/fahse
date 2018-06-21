@@ -10,8 +10,10 @@ var DAL = require('../models/DAL');
 var router = express.Router();
 router.get('/', function (req, res, next) {
     // ChangeItemInCart("JwnL6i8oCqHZshnijkXbsRyKIA8AJ5dW", 2, "5b24f3e1968641237042a01b", 1997, "TimMongMo", "XXXM", function () { });
-    GetTopProducts(10, function (res) {
-        console.log(res);
+    
+    
+    GetCart("KJDFOIVJODIJDOIFJOIEJF", function(success) {
+        console.log(success);
     })
     res.send("OK");
 });
@@ -46,6 +48,56 @@ function GetProductByCategoryID(categoryID, pageIndex, callback) {
 function GetAllCategory(callback) {
     DAL.QueryCategory({}, function (cats) {
         return callback(cats);
+    })
+}
+
+// 2.1.5
+function GetRelatedProduct(productID, topN, callback) {
+    DAL.QueryRelatedProducts(productID, topN, function (productDetails) {
+        callback(productDetails);
+    })
+}
+
+// 2.1.6
+function GetAllProductComments(productID, callback) {
+    DAL.QueryProductComments(productID, 0, function (comments) {
+        callback(comments);
+    })
+}
+
+// 2.1.7
+function GetProductCommentsByPageIndex(productID, pageIndex, callback) {
+    DAL.QueryProductComments(productID, pageIndex, function (comments) {
+        callback(comments);
+    })
+}
+
+// 2.1.8
+function AddProductComments(productID, username, content, callback) {
+    // Buidl COMMENT
+    var newComment = {
+        username: username,
+        content: content,
+        date: Date.now()
+    }
+
+    // Insert to Database
+    DAL.InsertProductComments(productID, newComment, function (success) {
+        callback(success);
+    } )
+}
+
+// 2.1.9
+function GenerateCart(sessionID, callback) {
+    DAL.CreateCart(sessionID, function (success) {
+        callback(success);
+    })
+}
+
+// 2.1.10
+function GetCart(sessionID, callback) {
+    DAL.QueryCart(sessionID, function (cart) {
+        callback(cart);
     })
 }
 
@@ -167,7 +219,7 @@ function ChangePassword(username, newPassword, callback) {
 
 // 2.1.20
 function Order(username, cartID, note, recipientName, address, phone, callback) {
-    
+
 }
 
 // 2.1.21
@@ -204,8 +256,12 @@ var exportObj = {
     ChangeUserInfo: ChangeUserInfo,
     ChangePassword: ChangePassword,
     GetAllOrderOfUser: GetAllOrderOfUser,
-    GetTopProducts: GetTopProducts
-
+    GetTopProducts: GetTopProducts,
+    GetRelatedProduct: GetRelatedProduct,
+    GetAllProductComments: GetAllProductComments,
+    GetProductCommentsByPageIndex: GetProductCommentsByPageIndex,
+    AddProductComments: AddProductComments,
+    GenerateCart: GenerateCart
 };
 
 // module.exports = exportObj;

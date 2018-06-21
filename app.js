@@ -66,8 +66,8 @@ app.use('/logout.html',logoutRouter);
 // app.use('/dal.html',dalRouter);
 // ============= DEBUG DAL.js
 // ============= DEBUG business.js
-var businessRouter = require('./controller/business');
-app.use('/business.html',businessRouter);
+// var businessRouter = require('./controller/business');
+// app.use('/business.html',businessRouter);
 // ============= DEBUG business.js
 
 // catch 404 and forward to error handler

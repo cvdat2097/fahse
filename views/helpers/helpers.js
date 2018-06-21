@@ -5,7 +5,7 @@ module.exports = {
         }
         return options.inverse(this);
     },
-    
+
     paginate: function (nPage, currentPage) {
         var accum = '';
         for (var i = 1; i <= nPage; ++i) {
@@ -28,5 +28,10 @@ module.exports = {
             }
         }
         return accum;
+    },
+
+    multiply: function (a, b) {
+        var r = Number.parseInt(a) * Number.parseInt(b);
+        return r.toString();
     }
 }

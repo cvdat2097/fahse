@@ -316,7 +316,8 @@ var exportObj = {
     GetProductCommentsByPageIndex: GetProductCommentsByPageIndex,
     AddProductComments: AddProductComments,
     GenerateCart: GenerateCart,
-    GetProduct: GetProduct
+    GetProduct: GetProduct,
+    Order: Order
 };
 
 module.exports = exportObj;

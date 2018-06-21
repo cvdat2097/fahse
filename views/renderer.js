@@ -338,9 +338,55 @@ var AdminPage = {
 
 var CheckoutPage = {
     RenderCheckoutPageGET: function RenderCartDetailPageGET(req, res, next) {
-        res.render('checkout', {});
-    }
+        var optionObj = {};
+        var cartDetail = [];
 
+        // var sessionId = req.sessionID;
+        business.GetCart(req.sessionID, function (cart) {
+            if (cart == null || cart.detail.length == 0) {
+                optionObj.cartIsEmpty = true;
+                res.render('checkout', optionObj);
+            } else {
+                async.series([
+                    function (cb1) {
+                        async.eachSeries(cart.detail, function (currentCartDetail, cb) {
+                            business.GetProduct(currentCartDetail.product.toString(), function (product) {
+                                if (product && product != null) {
+                                    cartDetail.push({
+                                        image: product.images[0],
+                                        color: this.color,
+                                        size: this.size,
+                                        name: product.name,
+                                        quantity: this.quantity,
+                                        price: product.price,
+                                        id: product._id
+                                    })
+                                };
+                                cb();
+                            }.bind(currentCartDetail));
+                        }, function (err) {
+                            if (err) {
+                                console.log(err);
+                            }
+                            cb1();
+                        });
+
+                    },
+                    function (cb) {
+                        optionObj.cartDetail = cartDetail;
+                        optionObj.cartIsEmpty = false;
+                        if (req.param('ajax') == 'true') {
+                            optionObj.layout = false;
+                            res.render('partials/checkout-list', optionObj);
+
+                        } else {
+                            res.render('checkout', optionObj);
+                        }
+                        cb();
+                    }])
+            }
+        });
+    }
 }
 
 var CartForm = {

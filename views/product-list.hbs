@@ -162,19 +162,19 @@
 
 										<div class="block2-btn-addcart w-size1 trans-0-4">
 											<!-- Button -->
-											<button class="flex-c-m size1 bg4 bo-rad-23 hov1 s-text1 trans-0-4">
+											<button class="flex-c-m size1 bg4 bo-rad-23 hov1 s-text1 trans-0-4" onclick="addItemToCart('{{_id}}',1,'{{color.[0]}}','{{size.[0]}}')">
 												Thêm vào giỏ
 											</button>
 										</div>
 									</div>
 								</div>
 
-								<div class="block2-txt p-t-20">
-									<a href="product.html?product={{_id}}" class="block2-name dis-block s-text3 p-b-5">
+								<div class=" block2-txt p-t-20 ">
+									<a href="product.html?product={{_id}} " class="block2-name dis-block s-text3 p-b-5 ">
 										{{name}}
 									</a>
 
-									<span class="block2-price m-text6 p-r-5">
+									<span class="block2-price m-text6 p-r-5 ">
 										{{price}} VND
 									</span>
 								</div>
@@ -184,7 +184,7 @@
 					</div>
 
 					<!-- Pagination -->
-					<div class="pagination flex-m flex-w p-t-26">
+					<div class="pagination flex-m flex-w p-t-26 ">
 						{{#paginate nPage currentPage}}
 						{{/paginate}}
 					</div>

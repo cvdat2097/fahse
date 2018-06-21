@@ -322,12 +322,12 @@ function DeleteItemInCart(sessionID, itemIndex, callback) {
         if (err) {
             console.log(err)
         } else {
-            if (!res) {
+            if (!res || res == null) {
                 console.log("Cart not found");
                 return callback(false)
             } else {
                 var unsetObj = {};
-                unsetObj["detail." + itemIndex] = 1;
+                unsetObj["detail." + itemIndex.toString()] = 1;
                 Cart.update({ session: sessionID }, { $unset: unsetObj }, function (err) {
                     if (err) {
                         console.log(err);
@@ -339,7 +339,6 @@ function DeleteItemInCart(sessionID, itemIndex, callback) {
                             } else {
                                 callback(true);
                             }
-
                         })
                     }
                 });
@@ -553,6 +552,18 @@ function InsertRelatedProduct(srcProductID, relatedProductID, callback) {
     })
 }
 
+// 3.1.17
+function QueryOneProduct(productID, callback) {
+    Product.findOne({_id: new mongoose.Types.ObjectId(productID)}, function (err, product) {
+        if (err) {
+            console.log(err);
+            callback(null);
+        } else {
+            callback(product);
+        }
+    })
+}
+
 var exportObj = {
     QueryProducts: QueryProducts,
     QueryRelatedProducts: QueryRelatedProducts,
@@ -569,7 +580,8 @@ var exportObj = {
     CreateOrder: CreateOrder,
     QueryOrder: QueryOrder,
     QueryCategory: QueryCategory,
-    InsertRelatedProduct: InsertRelatedProduct
+    InsertRelatedProduct: InsertRelatedProduct,
+    QueryOneProduct: QueryOneProduct
 }
 
 module.exports = exportObj;

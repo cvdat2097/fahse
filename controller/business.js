@@ -288,12 +288,19 @@ function GetTopProducts(topN, callback) {
     })
 }
 
+// 2.1.24
+function GetProduct(productID, callback) {
+   DAL.QueryOneProduct(productID, function (product) {
+       callback(product);
+   })
+}
 
 var exportObj = {
     GetAllProduct: GetAllProduct,
     GetProductByPageIndex: GetProductByPageIndex,
     GetProductByCategoryID: GetProductByCategoryID,
     GetAllCategory: GetAllCategory,
+    GetCart: GetCart,
     AddItemToCart: AddItemToCart,
     ChangeItemInCart: ChangeItemInCart,
     RemoveItemInCart: RemoveItemInCart,
@@ -308,7 +315,8 @@ var exportObj = {
     GetAllProductComments: GetAllProductComments,
     GetProductCommentsByPageIndex: GetProductCommentsByPageIndex,
     AddProductComments: AddProductComments,
-    GenerateCart: GenerateCart
+    GenerateCart: GenerateCart,
+    GetProduct: GetProduct
 };
 
 module.exports = exportObj;

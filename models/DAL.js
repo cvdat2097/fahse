@@ -231,7 +231,11 @@ function QueryCart(sessionID, callback) {
                 console.log(err);
                 callback(null);
             } else {
-                callback(cart, cart.detail.length);
+                if (cart != null) {
+                    callback(cart, cart.detail.length);
+                } else {
+                    callback(null);
+                }
             }
         });
     } else {
@@ -381,8 +385,13 @@ function QueryUser(username, callback) {
                 console.log(err);
                 callback(undefined);
             } else {
-                console.log("User found");
-                callback(userFound);
+                if (userFound && userFound != null) {
+                    console.log("User found");
+                    callback(userFound);
+                } else {
+                    console.log("User not found");
+                    callback(null);
+                }
             }
         })
     } else {
@@ -391,8 +400,13 @@ function QueryUser(username, callback) {
                 console.log(err);
                 callback(null);
             } else {
-                console.log("User found");
-                callback(userFound);
+                if (userFound && userFound != null) {
+                    console.log("User found");
+                    callback(userFound);
+                } else {
+                    console.log("User not found");
+                    callback(null);
+                }
             }
         })
     }
@@ -486,6 +500,59 @@ function QueryCategory(queryObj, callback) {
     });
 }
 
+// 3.1.16
+function InsertRelatedProduct(srcProductID, relatedProductID, callback) {
+    Product.findOne({ _id: new mongoose.Types.ObjectId(srcProductID) }, function (err, srcProduct) {
+        if (err) {
+            console.log(err);
+            return callback(false);
+        } else {
+            var relatedProductsArray = srcProduct.relatedProducts;
+
+            for (var i = 0; i < relatedProductsArray.length; i++) {
+                var firstObjectID = relatedProductsArray[i].product.toString();
+                var secondObjectID = relatedProductID.toString();
+                if (firstObjectID == secondObjectID) {
+                    // related product is existing in related list of srcProduct
+                    var setObj = {};
+                    relatedProductsArray[i].time = relatedProductsArray[i].time + 1;
+                    setObj["relatedProducts." + i.toString()] = relatedProductsArray[i];
+                    Product.updateOne(
+                        { _id: new mongoose.Types.ObjectId(srcProductID) },
+                        {
+                            $set: setObj
+                        }
+                        , function (err) {
+                            if (err) {
+                                console.log(err);
+                                return callback(false);
+                            } else {
+                            }
+                        });
+                    return callback(true);
+                }
+            }
+
+            // related product doesn't exist in related list of srcProduct
+            var newRelatedProductObj = {
+                product: new mongoose.Types.ObjectId(relatedProductID),
+                time: 1
+            }
+            Product.update(
+                { _id: new mongoose.Types.ObjectId(srcProductID) },
+                { $push: { relatedProducts: newRelatedProductObj } }, function (err) {
+                    if (err) {
+                        console.log(err);
+                        return callback(false);
+                    } else {
+                        return callback(true);
+                    }
+                }
+            )
+        }
+    })
+}
+
 var exportObj = {
     QueryProducts: QueryProducts,
     QueryRelatedProducts: QueryRelatedProducts,
@@ -501,7 +568,8 @@ var exportObj = {
     UpdateUser: UpdateUser,
     CreateOrder: CreateOrder,
     QueryOrder: QueryOrder,
-    QueryCategory: QueryCategory
+    QueryCategory: QueryCategory,
+    InsertRelatedProduct: InsertRelatedProduct
 }
 
 module.exports = exportObj;

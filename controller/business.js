@@ -10,9 +10,8 @@ var DAL = require('../models/DAL');
 var router = express.Router();
 router.get('/', function (req, res, next) {
     // ChangeItemInCart("JwnL6i8oCqHZshnijkXbsRyKIA8AJ5dW", 2, "5b24f3e1968641237042a01b", 1997, "TimMongMo", "XXXM", function () { });
-    
-    
-    GetCart("KJDFOIVJODIJDOIFJOIEJF", function(success) {
+
+    Order("dfadmin", "JwnL6i8oCqHZshnijkXbsRyKIA8AJ5dW", "note", "Nguye nVan Chi", "HCM City", "+849999999990", function (success) {
         console.log(success);
     })
     res.send("OK");
@@ -84,7 +83,7 @@ function AddProductComments(productID, username, content, callback) {
     // Insert to Database
     DAL.InsertProductComments(productID, newComment, function (success) {
         callback(success);
-    } )
+    })
 }
 
 // 2.1.9
@@ -218,8 +217,56 @@ function ChangePassword(username, newPassword, callback) {
 }
 
 // 2.1.20
-function Order(username, cartID, note, recipientName, address, phone, callback) {
+function Order(username, sessionID, note, recipientName, address, phone, callback) {
+    // Build ORDER
+    var newOrder;
 
+    DAL.QueryUser(username, function (userFound) {
+        if (userFound != null && userFound) {
+            DAL.QueryCart(sessionID, function (cartFound) {
+                if (cartFound) {
+                    if (cartFound.detail.length == 0) {
+                        return callback(false, "cart is empty");
+                    } else {
+                        // Build ORDER
+                        newOrder = {
+                            status: "pending",
+                            user: new mongoose.Types.ObjectId(userFound._id),
+                            detail: cartFound.detail,
+                            note: note,
+                            recipientName: recipientName,
+                            address: address,
+                            phone: phone
+                        }
+
+                        // Create Order in database
+                        DAL.CreateOrder(newOrder, function (success) {
+                            if (success) {
+                                // Update related products
+                                var realtedProductsArray = cartFound.detail;
+
+                                for (var i = 0; i < realtedProductsArray.length; i++) {
+                                    for (var j = i + 1; j < realtedProductsArray.length; j++) {
+                                        DAL.InsertRelatedProduct(realtedProductsArray[i].product, realtedProductsArray[j].product, function (success) {
+                                            if (!success) {
+                                                console.log("ERR Order - InsertRelatedProduct" + i.toString());
+                                            }
+                                        })
+                                    }
+                                }
+                            }
+                            return callback(success);
+                        })
+                    }
+                } else {
+                    console.log("Cart not found");
+                    return callback(false);
+                }
+            })
+        } else {
+            return callback(false);
+        }
+    })
 }
 
 // 2.1.21

@@ -41,9 +41,10 @@ app.use(session({
   // saveUninitialized: false,
 }))
 
-// passport setup
+// Passport setup
 app.use(passport.initialize());
 app.use(passport.session());
+
 passport.serializeUser(function (user, done) {
   done(null, user.username);
 });

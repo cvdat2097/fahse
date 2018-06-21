@@ -14,11 +14,6 @@ router.get('/', function (req, res, next) {
     renderer.LoginPage.RenderLoginPageGET(req, res, next);
 });
 
-// router.post('/', passport.authenticate('local', {
-//     failureRedirect: '/fail',
-//     successRedirect: '/login-success'
-// }))
-
 router.post('/', function (req, res, next) {
     passport.authenticate('local', function (err, user, info) {
         if (user) {
@@ -33,8 +28,6 @@ router.post('/', function (req, res, next) {
             } else if (user.type == "admin") {
                 res.redirect('/admin.html');
             }
-
-
         } else {
             res.redirect('/login.html')
         }

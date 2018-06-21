@@ -21,17 +21,17 @@ var IndexPage = {
 
         async.series([
             function (cb) {
-                Product.find({}, function (err, products) {
-                    productList = products;
-                    cb();
-                });
+               business.GetTopProducts(10, function (products) {
+                   productList = products;
+                   cb();
+               })
             },
 
             function (cb) {
-                Category.find({}, function (err, cats) {
+                business.GetAllCategory(function (cats) {
                     categoryList = cats;
                     cb();
-                });
+                })
             },
 
             // ROUTING
@@ -39,7 +39,8 @@ var IndexPage = {
                 res.render('index', {
                     productList: productList,
                     categoryList: categoryList,
-                    listName: "DANH SÁCH SẢN PHẨM"
+                    listName: "SẢN PHẨM BÁN CHẠY",
+                    isLogged: req.isAuthenticated()
                 });
                 cb();
             }
@@ -402,7 +403,7 @@ var CartForm = {
         // var sessionId = req.sessionID;
         business.GetCart(req.sessionID, function (cart) {
             if (cart == null || cart.detail.length == 0) {
-                res.send("Your cart is empty");
+                res.send("Giỏ hàng rỗng");
             } else {
                 async.series([
                     function (cb1) {

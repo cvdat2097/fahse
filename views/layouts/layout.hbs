@@ -84,7 +84,7 @@
 
 
 					<div class="header-wrapicon2">
-						<img src="images/icons/icon-header-02.png" class="header-icon1 js-show-header-dropdown" alt="ICON"  onclick="GetCart()">
+						<img src="images/icons/icon-header-02.png" class="header-icon1 js-show-header-dropdown" alt="ICON" onclick="GetCart()">
 						<!--<span class="header-icons-noti">0</span>-->
 
 						<!-- Header cart noti -->
@@ -94,12 +94,27 @@
 
 					<span class="linedivide1"></span>
 
-					<a href="#" class="header-wrapicon1 dis-block">
-						<img src="images/icons/icon-header-01.png" class="header-icon1" alt="ICON">
-					</a>
 
+					{{#if isLogged}}
+					<div class="header-wrapicon2">
+						<img src="images/icons/icon-header-01.png" class="header-icon1 js-show-header-dropdown" alt="ICON">
+						<!-- ACCOUNT MENU -->
+						<div style="width: 150px" class="header-cart header-dropdown">
+							<div class="t-center">
+								<a href="/account-settings.html">Tài khoản</a>
+							</div>
+							<div class="t-center">
+								<a href="/logout.html">Đăng xuất</a>
+							</div>
 
-
+						</div>
+						<!-- ACCOUNT MENU -->
+					</div>
+					{{else}}
+					<div class="header-wrapicon2">
+						<a href="/login.html">Đăng nhập</a>
+					</div>
+					{{/if}}
 				</div>
 			</div>
 		</div>

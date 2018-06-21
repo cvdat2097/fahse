@@ -3838,6 +3838,7 @@ SHAPE SHAPE SHAPE SHAPE SHAPE SHAPE SHAPE SHAPE SHAPE SHAPE
 .bo-rad-15 {border-radius: 15px;}
 .bo-rad-20 {border-radius: 20px;}
 .bo-rad-23 {border-radius: 23px;}
+.bo-rad-margin {margin-left: 200px;}
 
 .bo-t-rad-2 {
 	border-top-left-radius: 2px;

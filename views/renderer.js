@@ -202,9 +202,14 @@ var LoginPage = {
         });
     },
     RenderLoginPageGET: function RenderLoginPageGET(req, res, next) {
-        if (req.session.userid) {
-            res.redirect('/admin.html');
+        if (req.isAuthenticated()) {
+            if (req.user.type == 'admin') {
+                res.redirect('/admin.html');
+            } else {
+                res.redirect('/');
+            }
         } else {
+            // Login faild
             res.render('', { layout: 'admin/login' });
         }
     }
@@ -218,7 +223,7 @@ var RegisterPage = {
 
 var AdminPage = {
     RenderAdminPageGET: function RenderAdminPageGET(req, res, next) {
-        if (req.session.userid == undefined) {
+        if (!req.isAuthenticated()) {
             res.redirect('/login.html');
             res.end();
         } else {

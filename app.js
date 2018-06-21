@@ -8,7 +8,8 @@ const bodyParser = require('body-parser');
 var logger = require('morgan');
 var session = require('express-session');
 var business = require('./controller/business');
-
+var passport = require('passport');
+var LocalStrategy = require('passport-local').Strategy;
 
 var app = express();
 app.use(bodyParser.json());
@@ -30,13 +31,43 @@ app.engine('.hbs', exphbs({
 app.set('view engine', 'hbs');
 
 
-// Session settings
+// Session setup
 app.use(session({
-  secret: 'sdfl$lkdjflK$lkjdf@L@Klkdjf4'
+  secret: 'sdfl$lkdjflK$lkjdf@L@Klkdjf4',
+  cookie: {
+    maxAge: 1000 * 60 * 5
+  }
   // resave: false,
   // saveUninitialized: false,
-  // cookie: { secure: true }
 }))
+
+// passport setup
+app.use(passport.initialize());
+app.use(passport.session());
+passport.serializeUser(function (user, done) {
+  done(null, user.username);
+});
+
+passport.deserializeUser(function (name, done) {
+  business.GetUser(name, function (user) {
+    if (user != null && user) {
+      done(null, user);
+    } else {
+      done(null, false);
+    }
+  })
+});
+
+passport.use(new LocalStrategy(function (username, password, done) {
+  business.GetUser(username, function (user) {
+    if (user != null && user && user.username == username && user.password == password) {
+      return done(null, user);
+    } else {
+      return done(null, false);
+    }
+  });
+}));
+
 
 // Generate new cart for each sesison
 app.use(function (req, res, next) {

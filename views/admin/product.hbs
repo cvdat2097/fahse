@@ -16,6 +16,15 @@
 
 <!-- main content-->
 <div class="row">
+    <div class="col-lg-5"></div>
+    <div class="col-lg-2" style="margin-bottom: 20px">
+        <a class="btn btn-success" data-toggle="modal" href="#modalAdd">
+            <i class="icon_plus_alt2"></i> Thêm sản phẩm
+        </a>
+    </div>
+    <div class="col-lg-5"></div>
+</div>
+<div class="row">
     <div class="col-lg-12">
         <section class="panel">
             <header class="panel-heading" style="font-weight:bold">
@@ -27,43 +36,234 @@
                     <!-- Header -->
                     <tr>
                         <th>
-                            <i class="icon_profile"></i> Tên</th>
+                            <i class="icon_bag"></i> Tên</th>
                         <th>
-                            <i class="icon_calendar"></i> Giá (VND)</th>
+                            <i class="icon_currency"></i> Giá (VND)</th>
                         <th>
-                            <i class="icon_mail_alt"></i> Lượt xem</th>
+                            <i class="icon_datareport"></i> Màu</th>
                         <th>
-                            <i class="icon_pin_alt"></i> Đã bán</th>
+                            <i class="icon_datareport"></i> Size</th>
                         <th>
-                            <i class="icon_cogs"></i> Action</th>
+                            <i class="icon_datareport"></i> Lượt xem</th>
+                        <th>
+                            <i class="icon_tag_alt"></i> Đã bán</th>
+                        <th>
+                            <i class="icon_tool"></i> Thao tác</th>
                     </tr>
                     <!-- Header -->
 
                     {{#each products}}
                     <!-- Item -->
-                    <tr>
-                        <td><a style="color:midnightblue" href="../product.html?product={{_id}}" target="t_blank">{{name}}</a></td>
-                        <td>{{price}}</td>
-                        <td>{{view}}</td>
-                        <td>{{nItemSold}}</td>
+                    <tr id="datarow{{@index}}">
+                        <td class="product-name">
+                            <a style="color:midnightblue" href="../product.html?product={{_id}}" target="t_blank">{{name}}</a>
+                        </td>
+                        <td class="product-price">{{price}}</td>
+                        <td class="product-color">{{color}}</td>
+                        <td class="product-size">{{size}}</td>
+                        <td class="product-view">{{view}}</td>
+                        <td class="product-nItemSold">{{nItemSold}}</td>
                         <td>
                             <div class="btn-group">
-                                <a class="btn btn-primary" href="#">
-                                    <i class="icon_plus_alt2"></i>
+                                <a class="btn btn-info" data-toggle="modal" href="#modalUpdate" onclick="SendDataToProductModal('modalUpdate','datarow{{@index}}')">
+                                    <i class="icon_pencil-edit_alt"></i>
                                 </a>
-                                <a class="btn btn-success" href="#">
-                                    <i class="icon_check_alt2"></i>
-                                </a>
-                                <a class="btn btn-danger" href="#">
-                                    <i class="icon_close_alt2"></i>
+                                <a class="btn btn-danger" data-toggle="modal" href="#modalDelete" onclick="SendDataToProductModal('modalDelete','datarow{{@index}}')">
+                                    <i class="icon_trash"></i>
                                 </a>
                             </div>
                         </td>
+                        <td class="product-_id" style="display:none">{{_id}}</td>
+                        <td class="product-description" style="display:none">{{description}}</td>
+                        <td class="product-images" style="display:none">{{images}}</td>
+                        <td class="product-category" style="display:none">{{category}}</td>
                     </tr>
                     <!-- Item -->
                     {{/each}}
                 </tbody>
             </table>
         </section>
+    </div>
+</div>
+
+<!-- pagination -->
+<div class="text-center">
+    <ul class="pagination">
+        <li>
+            <a href="#">1</a>
+        </li>
+        <li>
+            <a href="#">2</a>
+        </li>
+        <li>
+            <a href="#">3</a>
+        </li>
+        <li>
+            <a href="#">4</a>
+        </li>
+        <li>
+            <a href="#">5</a>
+        </li>
+        <li>
+            <a href="#">»</a>
+        </li>
+    </ul>
+</div>
+
+<!--modal start-->
+<!-- Modal ADD-->
+<div class="modal fade" id="modalAdd" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                <h4 class="modal-title">Thêm sản phẩm</h4>
+            </div>
+            <div class="modal-body">
+                <div class="row">
+                    <label class="col-sm-2 control-label">Tên</label>
+                    <div class="col-sm-10">
+                        <input id="modalAddName" type="text" class="form-control">
+                    </div>
+                </div>
+
+                <div class="row">
+
+                    <label class="col-sm-2 control-label">Giá</label>
+                    <div class="col-sm-10">
+                        <input id="modalAddPrice" type="text" class="form-control">
+                    </div>
+                </div>
+                <div class="row">
+
+                    <label class="col-sm-2 control-label">Mô tả</label>
+                    <div class="col-sm-10">
+                        <input id="modalAddDescription" type="text" class="form-control">
+                    </div>
+                </div>
+
+                <div class="row">
+
+                    <label class="col-sm-2 control-label">Size</label>
+                    <div class="col-sm-10">
+                        <input id="modalAddSize" type="text" class="form-control">
+                    </div>
+                </div>
+
+                <div class="row">
+
+                    <label class="col-sm-2 control-label">Màu</label>
+                    <div class="col-sm-10">
+                        <input id="modalAddColor" type="text" class="form-control">
+                    </div>
+                </div>
+                <div class="row">
+
+                    <label class="col-sm-2 control-label">Hình ảnh</label>
+                    <div class="col-sm-10">
+                        <input id="modalAddImages" type="text" class="form-control">
+                    </div>
+                </div>
+            </div>
+
+            <div class="modal-footer">
+                <button data-dismiss="modal" class="btn btn-default" type="button">Hủy</button>
+                <button id="modalAddComfirmButton" onclick="AddProduct()" data-dismiss="modal" class="btn btn-success" type="button">Thêm</button>
+            </div>
+        </div>
+    </div>
+</div>
+</div>
+
+<!-- Modal UPDATE-->
+<div class="modal fade" id="modalUpdate" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                <h4 class="modal-title">Cập nhật sản phẩm</h4>
+            </div>
+            <div class="modal-body">
+                <div class="row">
+                    <label class="col-sm-2 control-label">Tên</label>
+                    <div class="col-sm-10">
+                        <input id="modalUpdateName" type="text" class="form-control">
+                    </div>
+                </div>
+
+                <div class="row">
+
+                    <label class="col-sm-2 control-label">Giá</label>
+                    <div class="col-sm-10">
+                        <input id="modalUpdatePrice" type="text" class="form-control">
+                    </div>
+                </div>
+                <div class="row">
+
+                    <label class="col-sm-2 control-label">Mô tả</label>
+                    <div class="col-sm-10">
+                        <input id="modalUpdateDescription" type="text" class="form-control">
+                    </div>
+                </div>
+
+                <div class="row">
+
+                    <label class="col-sm-2 control-label">Size</label>
+                    <div class="col-sm-10">
+                        <input id="modalUpdateSize" type="text" class="form-control">
+                    </div>
+                </div>
+
+                <div class="row">
+
+                    <label class="col-sm-2 control-label">Màu</label>
+                    <div class="col-sm-10">
+                        <input id="modalUpdateColor" type="text" class="form-control">
+                    </div>
+                </div>
+                <div class="row">
+
+                    <label class="col-sm-2 control-label">Hình ảnh</label>
+                    <div class="col-sm-10">
+                        <input id="modalUpdateImages" type="text" class="form-control">
+                    </div>
+                </div>
+                <div class="row">
+
+                    <label class="col-sm-2 control-label">Danh mục</label>
+                    <div class="col-sm-10">
+                        <input id="modalUpdateCategory" type="text" class="form-control">
+                    </div>
+                </div>
+
+            </div>
+
+            <div class="modal-footer">
+                <button data-dismiss="modal" class="btn btn-default" type="button">Hủy</button>
+                <button id="modalUpdateComfirmButton" data-dismiss="modal" class="btn btn-warning" type="button"> Cập nhật</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- modal DELETE-->
+<div class="modal fade" id="modalDelete" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                <h4 class="modal-title">Xóa sản phẩm</h4>
+            </div>
+            <div class="modal-body">
+
+                <p>Bạn có thực sự muốn xóa
+                    <span id="modalDeleteProductID" style="font-weight: bold"></span> ?</p>
+
+            </div>
+            <div class="modal-footer">
+                <button data-dismiss="modal" class="btn btn-default" type="button">Hủy</button>
+                <button id="modalDeleteComfirmButton" class="btn btn-danger" type="button" data-dismiss="modal"> Xóa</button>
+            </div>
+        </div>
     </div>
 </div>

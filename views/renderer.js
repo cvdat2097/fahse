@@ -62,21 +62,34 @@ var ProductPage = {
 
             // ROUTING
             function (cb) {
-                var Product = require('../models/productModel.js');
-                Product.find({ _id: req.param('product') }, function (err, products) {
+                var productID = req.param('product');
+                business.GetProduct(productID, function (product) {
+                    if (product != null && product) {
 
-                    var optionObj = products[0];
-                    optionObj.categoryList = categoryList;
 
-                    for (var x of categoryList) {
-                        if (optionObj.category[0] == x._id.toString()) {
-                            optionObj.category = x.name;
-                            optionObj.categoryID = x._id.toString();
+                        var optionObj = product;
+                        
+                        for (var i = 0; i < product.category.length; i++) {
+                            for (var x of categoryList) {
+                                if (optionObj.category[i].toString() === x._id.toString()) {
+                                    optionObj.category[i] = {
+                                        name: x.name,
+                                        id: x._id.toString()
+                                    }
+                                    break;
+                                }
+                            }
                         }
-                    }
 
-                    res.render('product', optionObj);
-                });
+                        business.IncreaseProductView(product._id.toString(), 1, function (success) {
+                            
+                        });
+                        res.render('product', optionObj);
+                    } else {
+                        res.send("Lỗi: Không thể lấy thông tin sản phẩm");
+                    }
+                })
+
                 cb();
             }
         ]);
@@ -221,7 +234,9 @@ var AdminPage = {
             } else {
                 var optionObj = {
                     layout: 'adminlayout',
-                    products: products
+                    products: products,
+                    user: req.user,
+                    isLogged: req.isAuthenticated()
                 }
                 res.render('admin/product', optionObj);
             }

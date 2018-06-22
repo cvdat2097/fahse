@@ -89,9 +89,11 @@ app.use(logger('dev'));
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
+// Static file serving
 app.use(express.static(path.join(__dirname, 'public')));
 app.use('/admin', express.static(path.join(__dirname, 'public/admin')));
 
+// ===================================================
 var indexRouter = require('./routes/index');
 var productRouter = require('./routes/product');
 var productListRouter = require('./routes/product-list');
@@ -100,6 +102,8 @@ var loginRouter = require('./routes/login');
 var logoutRouter = require('./routes/logout');
 var checkoutRouter = require('./routes/checkout');
 var cartRouter = require('./routes/cart');
+var registerRouter = require('./routes/register');
+var accountSettingsRouter = require('./routes/account-settings');
 // ================= ROUTING ==============
 app.use('/', indexRouter);
 app.use('/index.html', indexRouter);
@@ -109,6 +113,8 @@ app.use('/login.html', loginRouter);
 app.use('/logout.html', logoutRouter);
 app.use('/checkout.html', checkoutRouter);
 app.use('/cart.html', cartRouter);
+app.use('/register.html', registerRouter);
+app.use('/account-settings.html', accountSettingsRouter);
 app.use('/admin', adminRouter);
 // ================= ROUTING ==============
 

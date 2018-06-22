@@ -176,33 +176,6 @@ var CheckoutPage = {
 }
 
 var LoginPage = {
-    RenderLoginPagePOST: function RenderLoginPagePOST(req, res, next) {
-        var username = req.body['user'];
-        var pass = req.body['pass'];
-
-        var loggedIn = false;
-
-        User.find({}, function (err, adminList) {
-            if (adminList.length > 0) {
-                var i;
-                for (i = 0; i < adminList.length; i++) {
-                    if (adminList[i].username == username && adminList[i].password == pass) {
-                        req.session.userid = username;
-                        res.redirect('/admin');
-                        loggedIn = true;
-                        break;
-                    }
-                }
-            }
-
-            // Login failed
-            if (loggedIn == false) {
-                res.render('', { notification: 'Username or Password is incorrect', layout: 'admin/login' });
-            }
-
-        });
-    },
-
     RenderLoginPageGET: function RenderLoginPageGET(req, res, next) {
         if (req.isAuthenticated()) {
             if (req.user.type == 'admin') {
@@ -219,6 +192,10 @@ var LoginPage = {
 
 var RegisterPage = {
     RenderRegisterPage: function RenderRegisterPage(req, res, next) {
+        var optionObj = {
+            isLogged: req.isAuthenticated()
+        }
+        res.render('register', optionObj)
     }
 
 }
@@ -359,6 +336,14 @@ var CartForm = {
     }
 }
 
+var AccountSettingsPage = {
+    RenderAccountSettingsPage: function RenderAccountSettingsPage(req, res, next) {
+        var optionObj = {
+            isLogged: req.isAuthenticated()
+        }
+        res.render('account-settings', optionObj)
+    }
+}
 
 module.exports.IndexPage = IndexPage;
 module.exports.AdminPage = AdminPage;
@@ -368,3 +353,4 @@ module.exports.ProductPage = ProductPage;
 module.exports.CheckoutPage = CheckoutPage;
 module.exports.RegisterPage = RegisterPage;
 module.exports.CartForm = CartForm;
+module.exports.AccountSettingsPage = AccountSettingsPage;

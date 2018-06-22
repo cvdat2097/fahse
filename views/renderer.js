@@ -4,6 +4,7 @@ var async = require('async');
 var business = require('../controller/business');
 var CONST = require('../config');
 var dal = require('../models/DAL');
+var mongoose = require('mongoose');
 
 // Mongoose models
 var Cart = require('../models/cartModel');
@@ -62,21 +63,35 @@ var ProductPage = {
 
             // ROUTING
             function (cb) {
-                var Product = require('../models/productModel.js');
-                Product.find({ _id: req.param('product') }, function (err, products) {
+                var productID = req.param('product');
+                business.GetProduct(productID, function (product) {
+                    if (product != null && product) {
 
-                    var optionObj = products[0];
-                    optionObj.categoryList = categoryList;
 
-                    for (var x of categoryList) {
-                        if (optionObj.category[0] == x._id.toString()) {
-                            optionObj.category = x.name;
-                            optionObj.categoryID = x._id.toString();
+                        var optionObj = product;
+
+                        for (var i = 0; i < product.category.length; i++) {
+                            for (var x of categoryList) {
+                                if (optionObj.category[i].toString() === x._id.toString()) {
+                                    optionObj.category[i] = {
+                                        name: x.name,
+                                        id: x._id.toString()
+                                    }
+                                    break;
+                                }
+                            }
                         }
-                    }
 
-                    res.render('product', optionObj);
-                });
+                        business.IncreaseProductView(product._id.toString(), 1, function (success) {
+
+                        });
+                        optionObj.isLogged = req.isAuthenticated();
+                        res.render('product', optionObj);
+                    } else {
+                        res.send("Lỗi: Không thể lấy thông tin sản phẩm");
+                    }
+                })
+
                 cb();
             }
         ]);
@@ -113,7 +128,7 @@ var ProductListPage = {
                     optionObj.nPage = Math.floor(nProducts / CONST.PRODUCT_PER_PAGE) + 1;
                     optionObj.currentPage = pageIndex;
 
-
+                    optionObj.isLogged = req.isAuthenticated()
                     res.render('product-list', optionObj);
 
                     cb();
@@ -155,6 +170,7 @@ var ProductListPage = {
                         productList: products,
                         categoryList: categoryList
                     }
+                    optionObj.isLogged = req.isAuthenticated();
 
                     if (req.param('ajax') == 'true') {
                         optionObj.layout = false;
@@ -195,6 +211,7 @@ var RegisterPage = {
         var optionObj = {
             isLogged: req.isAuthenticated()
         }
+        optionObj.isLogged = req.isAuthenticated();
         res.render('register', optionObj)
     }
 
@@ -202,37 +219,98 @@ var RegisterPage = {
 
 var AdminPage = {
     RenderAdminIndexPageGET: function RenderAdminIndexPageGET(req, res, next) {
-        // if (!req.isAuthenticated() || req.user.type != 'admin') {
-        //     res.redirect('/login.html');
-        //     res.end();
-        // } else 
-        {
+        if (!req.isAuthenticated() || req.user.type != 'admin') {
+            res.redirect('/login.html');
+            res.end();
+        } else {
             var optionObj = {
-                layout: 'adminlayout'
+                layout: 'adminlayout',
+                user: req.user,
+                isLogged: req.isAuthenticated()
             }
+
             res.render('admin/index', optionObj)
         }
     },
 
-    RenderAdminProductPage: function RenderAdminProductPage(req, res, next) {
-        business.GetAllProduct(function (products) {
-            if (products == null) {
-                res.send("Lỗi: Không thể lấy danh sách sản phẩm");
-            } else {
-                var optionObj = {
-                    layout: 'adminlayout',
-                    products: products
+    RenderAdminProductPage: function RenderAdminProductPage(req, res, ajax, next) {
+        if (!req.isAuthenticated() || req.user.type != 'admin') {
+            res.redirect('/login.html');
+            res.end();
+        } else {
+
+
+            business.GetAllProduct(function (products) {
+                if (products == null) {
+                    res.send("Lỗi: Không thể lấy danh sách sản phẩm");
+                } else {
+                    var optionObj = {
+                        layout: 'adminlayout',
+                        products: products,
+                        user: req.user,
+                        isLogged: req.isAuthenticated()
+                    }
+                    if (ajax) {
+                        optionObj.layout = false;
+                        res.render('admin/product', optionObj);
+                    } else {
+                        res.render('admin/product', optionObj);
+                    }
                 }
-                res.render('admin/product', optionObj);
-            }
-        })
+            })
+        }
     },
 
-    RenderAdminCategoryPage: function RenderAdminCategoryPage(req, res, next) {
-        var optionObj = {
-            layout: 'adminlayout'
+    RenderAdminUserPage: function RenderAdminUserPage(req, res, ajax, next) {
+        if (!req.isAuthenticated() || req.user.type != 'admin') {
+            res.redirect('/login.html');
+            res.end();
+        } else {
+            User.find({}, function (err, users) {
+                if (users == null) {
+                    res.send("Lỗi: Không thể lấy danh sách người dùng");
+                } else {
+                    var optionObj = {
+                        layout: 'adminlayout',
+                        users: users,
+                        user: req.user,
+                        isLogged: req.isAuthenticated()
+                    }
+                    if (ajax) {
+                        optionObj.layout = false;
+                        res.render('admin/user', optionObj);
+                    } else {
+                        res.render('admin/user', optionObj);
+                    }
+                }
+            })
         }
-        res.render('admin/category', optionObj);
+    },
+
+    RenderAdminOrderPage: function RenderAdminOrderPage(req, res, next) {
+        if (!req.isAuthenticated() || req.user.type != 'admin') {
+            res.redirect('/login.html');
+            res.end();
+        } else {
+            Order.find({}, function (err, orders) {
+                if (orders == null) {
+                    res.send("Lỗi: Không thể lấy danh sách đơn hàng");
+                } else {
+
+                    var optionObj = {
+                        orders: orders,
+                        layout: 'adminlayout',
+                        user: req.user,
+                        isLogged: req.isAuthenticated()
+                    }
+                    if (req.param('ajax') == 'true') {
+                        optionObj.layout = false;
+                    }
+                    res.render('admin/order', optionObj);
+                }
+            })
+        }
+
     }
 }
 
@@ -240,7 +318,7 @@ var CheckoutPage = {
     RenderCheckoutPageGET: function RenderCartDetailPageGET(req, res, next) {
         var optionObj = {};
         var cartDetail = [];
-
+        optionObj.isLogged = req.isAuthenticated();
         // var sessionId = req.sessionID;
         business.GetCart(req.sessionID, function (cart) {
             if (cart == null || cart.detail.length == 0) {
@@ -293,6 +371,7 @@ var CartForm = {
     RenderCartFormGET: function RenderCartFormGET(req, res, next) {
         var optionObj = {};
         var cartDetail = [];
+        optionObj.isLogged = req.isAuthenticated();
 
         // var sessionId = req.sessionID;
         business.GetCart(req.sessionID, function (cart) {

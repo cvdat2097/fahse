@@ -293,13 +293,13 @@
               <span class="profile-ava">
                 <img alt="" src="img/avatar1_small.jpg">
               </span>
-              <span class="username">Admin</span>
+              <span class="username">{{user.username}}</span>
               <b class="caret"></b>
             </a>
             <ul class="dropdown-menu extended logout">
               <div class="log-arrow-up"></div>
               <li>
-                <a href="logout.html">
+                <a href="/logout.html">
                   <i class="icon_key_alt"></i> Log Out</a>
               </li>
             </ul>
@@ -327,7 +327,10 @@
                 <a class="" href="/admin/product.html">Sản phẩm</a>
               </li>
               <li>
-                <a class="" href="/admin/category.html">Danh mục</a>
+                <a class="" href="/admin/user.html">Tài khoản</a>
+              </li>
+              <li>
+                <a class="" href="/admin/order.html">Đơn hàng</a>
               </li>
             </ul>
           </li>
@@ -342,7 +345,9 @@
     <!-- ============================== page start-->
     <section id="main-content">
       <section class="wrapper">
+        <div id="body-content">
         {{{body}}}
+        </div>
       </section>
     </section>
     <!-- ================================ page end-->
@@ -354,6 +359,7 @@
   <!-- container section end -->
   <!-- javascripts -->
   <script src="js/jquery.js"></script>
+  <script src="js/admin-client.js"></script>
   <script src="js/bootstrap.min.js"></script>
   <!-- nice scroll -->
   <script src="js/jquery.scrollTo.min.js"></script>

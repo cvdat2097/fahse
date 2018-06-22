@@ -290,9 +290,26 @@ function GetTopProducts(topN, callback) {
 
 // 2.1.24
 function GetProduct(productID, callback) {
-   DAL.QueryOneProduct(productID, function (product) {
-       callback(product);
-   })
+    DAL.QueryOneProduct(productID, function (product) {
+        callback(product);
+    })
+}
+
+// 2.1.25
+function IncreaseProductView(productID, amount, callback) {
+    DAL.QueryOneProduct(productID, function (product) {
+        if (product != null && product) {
+            var newProduct = {
+                view: product.view + amount
+            }
+
+            DAL.UpdateProduct(productID, newProduct, function (success) {
+                return callback(success);
+            })
+        } else {
+            return callback(false);
+        }
+    })
 }
 
 var exportObj = {
@@ -317,7 +334,8 @@ var exportObj = {
     AddProductComments: AddProductComments,
     GenerateCart: GenerateCart,
     GetProduct: GetProduct,
-    Order: Order
+    Order: Order,
+    IncreaseProductView: IncreaseProductView
 };
 
 module.exports = exportObj;

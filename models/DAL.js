@@ -564,6 +564,18 @@ function QueryOneProduct(productID, callback) {
     })
 }
 
+// 3.1.18
+function UpdateProduct(productID, newProduct, callback) {
+   Product.updateOne({_id: new mongoose.Types.ObjectId(productID)}, newProduct, function (err) {
+       if (err) {
+           console.log(err);
+           return callback(false);
+       } else {
+           return callback(true);
+       }
+   })
+}
+
 var exportObj = {
     QueryProducts: QueryProducts,
     QueryRelatedProducts: QueryRelatedProducts,
@@ -581,7 +593,8 @@ var exportObj = {
     QueryOrder: QueryOrder,
     QueryCategory: QueryCategory,
     InsertRelatedProduct: InsertRelatedProduct,
-    QueryOneProduct: QueryOneProduct
+    QueryOneProduct: QueryOneProduct,
+    UpdateProduct: UpdateProduct
 }
 
 module.exports = exportObj;

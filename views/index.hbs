@@ -156,20 +156,27 @@
 					<img src="images/icons/bg-01.jpg" alt="IMG">
 
 					<div class="block2-content sizefull ab-t-l flex-col-c-m">
-						<h4 class="m-text4 t-center w-size3 p-b-8">
-							Sign up & get 20% off
-						</h4>
-
-						<p class="t-center w-size4">
-							Be the frist to know about the latest fashion news and get exclu-sive offers
-						</p>
-
+						{{#if isLogged}}
+						<a href="product-list.html" class="m-text4 t-center w-size3 p-b-8">
+							Còn nhiều sản phẩm nữa đang chờ bạn khám phá
+						</a>
 						<div class="w-size2 p-t-25">
 							<!-- Button -->
-							<a href="#" class="flex-c-m size2 bg4 bo-rad-23 hov1 m-text3 trans-0-4">
-								Sign Up
+							<a href="product-list.html" class="flex-c-m size2 bg4 bo-rad-23 hov1 m-text3 trans-0-4">
+								Xem ngay
 							</a>
 						</div>
+						{{else}}
+						<a href="register.html" class="m-text4 t-center w-size3 p-b-8">
+							Đăng ký và bắt đầu mua sắm ngay
+						</a>
+						<div class="w-size2 p-t-25">
+							<!-- Button -->
+							<a href="register.html" class="flex-c-m size2 bg4 bo-rad-23 hov1 m-text3 trans-0-4">
+								Đăng ký
+							</a>
+						</div>
+						{{/if}}
 					</div>
 				</div>
 			</div>

@@ -1,0 +1,39 @@
+<!-- Header cart noti -->
+
+<ul class="header-cart-wrapitem">
+	{{#each cartDetail}}
+	<!-- Item -->
+	<li class="header-cart-item">
+		<div class="header-cart-item-img" onclick="removeCartItem({{@index}})">
+			<!-- Hình sản phẩm -->
+			<img src="{{image}}" alt="IMG">
+		</div>
+
+		<div class="header-cart-item-txt ">
+			<!-- Tên sản phẩm -->
+			<a href="/product.html?product={{id}} " class="header-cart-item-name ">
+				{{name}}
+			</a>
+
+			<!-- Số lượng, màu sắc sản phẩm -->
+			<span class="header-cart-item-info ">
+				{{quantity}} {{color}} x {{price}}
+			</span>
+		</div>
+	</li>
+	<!-- END Item -->
+	{{/each}}
+</ul>
+
+<div class="header-cart-total ">
+	Total: $75.00
+</div>
+
+<div class="header-cart-buttons ">
+	<div class="header-cart-wrapbtn ">
+		<!-- Button -->
+		<a href="checkout.html " style="float:right;" class="flex-c-m size1 bg1 bo-rad-20 hov1 s-text1 trans-0-4 ">
+			Thanh toán
+		</a>
+	</div>
+</div>

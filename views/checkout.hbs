@@ -1,0 +1,17 @@
+<!-- Title Page -->
+<section class="bg-title-page p-t-40 p-b-50 flex-col-c-m" style="background-image: url(images/heading-pages-01.jpg);">
+	<h2 class="l-text2 t-center">
+		THANH TOÁN
+	</h2>
+</section>
+
+{{#if cartIsEmpty}}
+<div>
+	<h2 class="t-center" style="margin-top: 80px">Giỏ hàng của bạn rỗng</h2>
+</div>
+{{else}}
+<!-- Cart -->
+<section id="cart-item-list" class="cart bgwhite p-t-70 p-b-100">
+	{{> checkout-list}}
+</section>
+{{/if}}

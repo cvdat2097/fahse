@@ -332,32 +332,30 @@ var Test = {
         async.series([
             function (cb) {
                 Category.find({}, function (err, categories) {
-                    categoryList = categories;                 
+                    categoryList = categories;             
                     cb();
                 });
             },
-
-            console.log('>>>>>>>>>>>>>>>>'+categoryList[0])
-            // res.render('test',{SHOW_TEST: categoryList[0]})
             // ROUTING
-            // function (cb) {
-            //     var Product = require('../models/productModel.js');
-            //     Product.find({ _id: req.param('product') }, function (err, products) {
+            function (cb) {
+                var Product = require('../models/productModel.js');
+                Product.find({ _id: req.param('product') }, function (err, products) {
 
-            //         var optionObj = products[0];
-            //         optionObj.categoryList = categoryList;
+                    // var optionObj = products[0];
+                    console.log(">>>>>>>>>>>"+products)
+                    // optionObj.categoryList = categoryList;
 
-            //         for (var x of categoryList) {
-            //             if (optionObj.category[0] == x._id.toString()) {
-            //                 optionObj.category = x.name;
-            //                 optionObj.categoryID = x._id.toString();
-            //             }
-            //         }
+                    // for (var x of categoryList) {
+                    //     if (optionObj.category[0] == x._id.toString()) {
+                    //         optionObj.category = x.name;
+                    //         optionObj.categoryID = x._id.toString();
+                    //     }
+                    // }
 
-            //         res.render('product', optionObj);
-            //     });
-            //     cb();
-            // }
+                    // res.render('product', optionObj);
+                });
+                cb();
+            }
         ]);
     }
 

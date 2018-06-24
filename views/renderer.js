@@ -52,6 +52,7 @@ var IndexPage = {
 var ProductPage = {
     RenderProductPage: function RenderProductPage(req, res, next) {
         var categoryList;
+        var productList;
 
         async.series([
             function (cb) {
@@ -60,13 +61,20 @@ var ProductPage = {
                     cb();
                 });
             },
+            function (cb) {
+                let productID = req.param("product");
+                console.log('----------------------->GO-1');
+                business.GetRelatedProduct(productID,1, function (products) {
+                    productList = products;
+                    cb();
+                })
+            },
 
             // ROUTING
             function (cb) {
                 var productID = req.param('product');
                 business.GetProduct(productID, function (product) {
                     if (product != null && product) {
-
 
                         var optionObj = product;
 
@@ -81,17 +89,24 @@ var ProductPage = {
                                 }
                             }
                         }
-
                         business.IncreaseProductView(product._id.toString(), 1, function (success) {
-
                         });
                         optionObj.isLogged = req.isAuthenticated();
-                        res.render('product', optionObj);
+                        res.render('product',{images:optionObj.images,name:optionObj.name,price:optionObj.price,descripton:optionObj.descripton,size:optionObj.size,color:optionObj.color,view:optionObj.view,category:optionObj.category,related_product:productList});
                     } else {
                         res.send("Lỗi: Không thể lấy thông tin sản phẩm");
                     }
-                })
+                });
+                // business.GetRelatedProduct(productID,3, function (product) {
+                //     if (product != null && product) {
 
+                //         var optionObj = product;
+                //         optionObj.isLogged = req.isAuthenticated();
+                //         res.render('product', optionObj);
+                //     } else {
+                //         res.send("Lỗi: Không thể lấy thông tin sản phẩm");
+                //     }
+                // });
                 cb();
             }
         ]);

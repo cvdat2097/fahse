@@ -50,7 +50,7 @@
                     <tr id="datarow{{@index}}">
                         <td class="order-_id">{{_id}}</td>
                         <td>
-                            <select class="order-status">
+                            <select style="font-weight:bold;" class="order-status">
                                 <option>{{status}}</option>
                                 <option>pending</option>
                                 <option>delivering</option>
@@ -58,7 +58,8 @@
                             </select>
                         </td>
                         <td class="order-detail">
-                            {{#each detail}} {{product}} - {{color}} - {{size}} x {{quantity}}
+                            {{#each detail}}
+                            <a target="t_blank" href="/product.html?product={{product}}">{{name}}</a> - {{color}} - {{size}} x {{quantity}}
                             <br /> {{/each}}
                         </td>
                         <td class="order-recipient">{{recipientName}}</td>

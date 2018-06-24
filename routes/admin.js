@@ -117,10 +117,16 @@ router.post('/user.html', function (req, res, next) {
       var name = req.param('name');
       var phone = req.param('phone');
       var address = req.param('address');
+      var usertype = req.param('usertype').toLowerCase();
 
-      business.ChangeUserInfo(username, name, phone, address, function (success) {
-        res.send(success.toString());
-      })
+      if (req.user.username == username) {
+        res.send('false');
+      } else {
+
+        business.ChangeUserInfo(username, name, phone, address, usertype, function (success) {
+          res.send(success.toString());
+        })
+      }
       break;
   }
 });
@@ -155,12 +161,18 @@ router.post('/order.html', function (req, res, next) {
       var _id = req.param('_id');
       var status = req.param('status');
 
-      Order.updateOne({_id: new mongoose.Types.ObjectId(_id)},{status: status.toLowerCase()}, function (err) {
-        if (err) {
-          console.log(err);
-          res.send('false');
+      Order.findOne({ _id: new mongoose.Types.ObjectId(_id) }, function (err, order) {
+        if (order && order != null) {
+          Order.updateOne({ _id: new mongoose.Types.ObjectId(_id) }, { status: status.toLowerCase() }, function (err) {
+            if (err) {
+              console.log(err);
+              res.send('false');
+            } else {
+              res.send('true');
+            }
+          })
         } else {
-          res.send('true');
+          res.send('false');
         }
       })
       break;

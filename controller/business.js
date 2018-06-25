@@ -102,15 +102,24 @@ function GetCart(sessionID, callback) {
 
 // 2.1.11
 function AddItemToCart(sessionID, productID, quantity, color, size, callback) {
-    var cartDetal = {
-        product: new mongoose.Types.ObjectId(productID),
-        quantity: quantity,
-        color: color,
-        size: size
-    }
+    
+    GetProduct(productID, function (product) {
+        if (product && product != null) {
+            var cartDetal = {
+                product: new mongoose.Types.ObjectId(productID),
+                name: product.name, 
+                quantity: quantity,
+                color: color,
+                size: size
+            }
 
-    DAL.InsertItemToCart(sessionID, cartDetal, function (success) {
-        callback(success);
+            DAL.InsertItemToCart(sessionID, cartDetal, function (success) {
+                callback(success);
+            })
+        } else {
+            console.log("Product not found");
+            callback(false);
+        }
     })
 }
 
@@ -189,12 +198,13 @@ function ValidateLogin(username, password, callback) {
 }
 
 // 2.1.17
-function ChangeUserInfo(username, name, phone, address, callback) {
+function ChangeUserInfo(username, name, phone, address,type, callback) {
     // Build new USER
     var newUser = {
         name: name,
         phone: phone,
-        address: address
+        address: address,
+        type: type
     }
 
     // Update USER in database

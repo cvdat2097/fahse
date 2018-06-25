@@ -131,7 +131,7 @@ function SendDataToUserModal(modal, rowid) {
     var _id = document.querySelector("#" + rowid + " .user-_id").innerHTML;
     var name = document.querySelector("#" + rowid + " .user-name").innerHTML;
     var username = document.querySelector("#" + rowid + " .user-username").innerHTML;
-    var email = document.querySelector("#" + rowid + " .user-email").innerHTML;
+    var type = document.querySelector("#" + rowid + " .user-type").innerHTML;
     var phone = document.querySelector("#" + rowid + " .user-phone").innerHTML;
     var address = document.querySelector("#" + rowid + " .user-address").innerHTML;
     switch (modal) {
@@ -145,12 +145,14 @@ function SendDataToUserModal(modal, rowid) {
             document.getElementById("modalUpdateName").value = name;
             document.getElementById("modalUpdatePhone").value = phone;
             document.getElementById("modalUpdateAddress").value = address;
+            document.getElementById("modalUpdateType").value = type;
 
             document.getElementById("modalUpdateComfirmButton").onclick = UpdateUser.bind({
                 username: username,
                 name: name,
                 phone: phone,
-                address: address
+                address: address,
+                type: type
             });
             break;
     }
@@ -190,6 +192,8 @@ function UpdateUser() {
     var name = document.getElementById('modalUpdateName').value;
     var phone = document.getElementById('modalUpdatePhone').value;
     var address = document.getElementById('modalUpdateAddress').value;
+    var type = document.getElementById('modalUpdateType').value;
+    console.log(type);
 
     var http = new XMLHttpRequest();
     http.open("POST", "user.html", true);
@@ -207,6 +211,7 @@ function UpdateUser() {
     http.send("ajax=true&type=updateuser&username=" + username.toString() +
         "&name=" + name +
         "&phone=" + phone +
+        "&usertype=" + type +
         "&address=" + address);
 }
 
@@ -283,3 +288,6 @@ function UpdateOrder() {
         "&status=" + status);
 }
 
+function ChangeElementValue(value) {
+    this.value = value;
+}

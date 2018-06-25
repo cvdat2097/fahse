@@ -6,5 +6,4 @@ router.get('/', function (req, res, next) {
   renderer.ProductPage.RenderProductPage(req,res,next);
 });
 
-
 module.exports = router;

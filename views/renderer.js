@@ -62,7 +62,8 @@ var ProductPage = {
           categoryList = categories;
           cb();
         });
-      },
+      }
+      ,
       function(cb) {
         let productID = req.param("product");
         business.GetRelatedProduct(productID, 1, function(products) {

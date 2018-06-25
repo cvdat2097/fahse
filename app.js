@@ -15,6 +15,7 @@ var app = express();
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 
+
 // Connect to database
 var mongoose = require('mongoose');
 mongoose.connect(CONST.CONNECTION_STRING);

@@ -1,5 +1,6 @@
 // product-list
-
+var business = require('./../../controller/business.js');
+var emailExistence = require('email-existence');
 // Request a page base on pageIndex
 function requestProductListByPageIndex(pageIndex) {
     var http = new XMLHttpRequest();
@@ -128,4 +129,43 @@ function Order() {
     }
 
     http.send();
+}
+function checkInforRegister(username, password, name, email, phone, address, verifypassword) {
+  var warningText = document.getElementById("warning");
+  if (username == "") {
+    warningText.innerHTML = "username is empty";
+    return false;
+  }
+  if (name == "") {
+    warningText.innerHTML = "Full name is required";
+    return false;
+  }
+  if (email == "") {
+    warningText.innerHTML = "Email is required";
+    return false;
+  }
+  if (phone == "") {
+    warningText.innerHTML = "Phone number is required";
+    return false;
+  }
+  if (username == "") {
+    warningText.innerHTML = "Username is required";
+    return false;
+  }
+  if (address == "") {
+    warningText.innerHTML = "Address is required";
+    return false;
+  }
+  if (password == "") {
+    warningText.innerHTML = "Password is required";
+    return false;
+  }
+  if (password != verifypassword) {
+    warningText.innerHTML = "Password not matched";
+    return false;
+  }
+    warningText.innerHTML = "";
+    RegisterNewUser('customer', username, password, name, email, phone, address,function (username){});
+    alert("Register successfully");
+    return true;
 }

@@ -150,7 +150,7 @@ function RegisterNewUser(type, username, password, name, email, phone, address, 
         },
 
         function (cb) {
-            // Build a USER 
+            // Build a USER
             var newUser = {
                 type: type,
                 username: username,
@@ -294,7 +294,6 @@ function GetProduct(productID, callback) {
        callback(product);
    })
 }
-
 var exportObj = {
     GetAllProduct: GetAllProduct,
     GetProductByPageIndex: GetProductByPageIndex,

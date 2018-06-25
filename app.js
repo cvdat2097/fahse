@@ -3,6 +3,7 @@ const exphbs = require('express-handlebars');
 var createError = require('http-errors');
 var express = require('express');
 var path = require('path');
+var passport = require('passport');
 var cookieParser = require('cookie-parser');
 const bodyParser = require('body-parser');
 var logger = require('morgan');
@@ -99,6 +100,7 @@ var loginRouter = require('./routes/login');
 var logoutRouter = require('./routes/logout');
 var checkoutRouter = require('./routes/checkout');
 var cartRouter = require('./routes/cart');
+var registerRouter = require('./routes/register');
 // ================= ROUTING ==============
 app.use('/', indexRouter);
 app.use('/index.html', indexRouter);
@@ -109,6 +111,7 @@ app.use('/login.html', loginRouter);
 app.use('/logout.html', logoutRouter);
 app.use('/checkout.html', checkoutRouter);
 app.use('/cart.html', cartRouter);
+app.use('/register.html',registerRouter);
 // ================= ROUTING ==============
 
 

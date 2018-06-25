@@ -217,6 +217,7 @@ var LoginPage = {
 
 var RegisterPage = {
     RenderRegisterPage: function RenderRegisterPage(req, res, next) {
+      res.render('register', {});
     }
 
 }

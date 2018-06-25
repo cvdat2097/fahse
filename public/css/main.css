@@ -1,7 +1,7 @@
 /*------------------------------------------------------------------
-Project:  
-Version:  
-Last change:  
+Project:
+Version:
+Last change:
 Assigned to:  Le Xuan Bach
 Primary use:  Company
 -------------------------------------------------------------------*/
@@ -21,10 +21,10 @@ Primary use:  Company
 /*------------------------------------------------------------------
 [COLOR CODES]
 
-# Text Color      :  
-# Primary Color 01:  
-# Primary Color 02:   
-# Primary Color 03:  
+# Text Color      :
+# Primary Color 01:
+# Primary Color 02:
+# Primary Color 03:
 
 ------------------------------------------------------------------*/
 
@@ -207,6 +207,9 @@ iframe {
 
 .container {
   max-width: 1200px;
+}
+.adjustcontainer{
+  margin-left: 300px;
 }
 
 .slick-slide {
@@ -1141,7 +1144,7 @@ li.sale-noti>a {
 }
 
 .side-menu .sub-menu>li {
-  padding-left: 12px;  
+  padding-left: 12px;
 }
 
 .side-menu .sub-menu a:hover {

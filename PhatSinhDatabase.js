@@ -273,7 +273,7 @@ async.series([
             ["images/product/AK_AD_0000_0.jpg", "images/product/AK_AD_0000_1.jpg", "images/product/AK_AD_0000_2.jpg"],
             categoryList[1],
             [],
-            [],
+            [{"name":"chung","content":"Nhin chan"},{"name":"chung","content":"Nhin chan"},{"name":"chung","content":"Nhin chan"},{"name":"chung","content":"Nhin chan"},{"name":"chung","content":"Nhin chan"},{"name":"chung","content":"Nhin chan"},{"name":"chung","content":"Nhin chan"},{"name":"chung","content":"Nhin chan"},{"name":"chung","content":"Nhin chan"},{"name":"chung","content":"Nhin chan"},{"name":"chung","content":"Nhin chan"},{"name":"chung","content":"Nhin chan"},{"name":"chung","content":"Nhin chan"},{"name":"chung","content":"Nhin chan"},{"name":"chung","content":"Nhin chan"},{"name":"chung","content":"Nhin chan"},{"name":"chung","content":"Nhin chan"}],
             callback);
     },
     function (callback) {

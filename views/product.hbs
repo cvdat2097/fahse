@@ -31,7 +31,7 @@
 			</p>
 
 			<!--  -->
-			<div class="p-t-33 p-b-60">
+			<div>
 				<div class="flex-m flex-w p-b-10">
 					<div class="s-text15 w-size15 t-center">
 						Kích cỡ
@@ -85,16 +85,65 @@
 					</div>
 				</div>
 			</div>
-
-			<div class="p-b-45">
+			<div>
 				<span class="s-text13">Lượt xem: {{view}} </span>
 			</div>
-			<div class="p-b-45">
+			<div>
 				<span class="s-text11">Danh mục: {{#each category}}
 					<a href="/product-list.html?category={{id}}">{{name}}, </a> {{/each}}
 				</span>
 			</div>
-
+			{{!-- comment --}}
+			<h3 style="margin:10px 0px;">
+				BÌNH LUẬN
+			</h3>
+			{{#each comment}}
+			<div>
+				<div class="row">
+					<div class="col-sm-12">
+						<div class="panel panel-white post">
+							<div class="post-heading">
+								<div class="pull-left image">
+									<img src="http://bootdey.com/img/Content/user_1.jpg" class="img-circle avatar" alt="user profile image">
+								</div>
+								<div class="pull-left meta">
+									<div class="title">
+										<a href="#">
+											<b>{{name}}</b>
+										</a>
+										made a post.
+									</div>
+									<p>{{content}}</p>
+								</div>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+			{{/each}} {{!-- PHAN TRANG --}}
+			<ul class="pagination" style="margin:10px auto">
+				<li class="page-item disabled">
+					<span class="page-link">Previous</span>
+				</li>
+				{{#each pagination}}
+				<li class="page-item">
+					<a class="page-link" href="product.html?product={{_id}}&page={{page}}">{{page}}</a>
+				</li>
+				{{/each}}
+				<li class="page-item">
+					<a class="page-link" href="#">Next</a>
+				</li>
+			</ul>
+			{{!-- ADD COMMENT --}}
+			<div class="widget-area no-padding blank">
+				<div class="status-upload">
+					<form>
+						<textarea placeholder="Your comment"></textarea>
+						<button type="submit" class="btn btn-success green">
+							<i class="fa fa-share"></i> Comment</button>
+					</form>
+				</div>
+			</div>
 			<!--  -->
 		</div>
 	</div>

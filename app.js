@@ -104,6 +104,7 @@ var checkoutRouter = require('./routes/checkout');
 var cartRouter = require('./routes/cart');
 var registerRouter = require('./routes/register');
 var accountSettingsRouter = require('./routes/account-settings');
+
 // ================= ROUTING ==============
 app.use('/', indexRouter);
 app.use('/index.html', indexRouter);
@@ -117,7 +118,6 @@ app.use('/register.html', registerRouter);
 app.use('/account-settings.html', accountSettingsRouter);
 app.use('/admin', adminRouter);
 // ================= ROUTING ==============
-
 
 // ============= DEBUG DAL.js
 // var dalRouter = require('./models/DAL');

@@ -165,23 +165,25 @@ function QueryRelatedProducts(productID, topN, callback) {
             console.log(err);
         } else {
             let listID = [];
-            let temp = result.relatedProducts.slice(0, topN);
-            for (let i = 0; i < temp.length; i++) {
-                listID[i] = temp[i].product;
-            }
-
-            let arrResult = [];
-            let product = Product.find({
-                _id: listID
-            });
-            product.exec(function (err, products) {
-                if (err) {
-                    console.log(err);
-                } else {
-                    arrResult = products;
+            if(result!=null){
+                let temp = result.relatedProducts.slice(0, topN);
+                for (let i = 0; i < temp.length; i++) {
+                    listID[i] = temp[i].product;
                 }
-                return callback(arrResult);
-            });
+                // listID = ["5b2e59004d01e4362459c83f","5b2e58fe4d01e4362459c83e"]
+                let arrResult = [];
+                let product = Product.find({
+                    _id: listID
+                });
+                product.exec(function (err, products) {
+                    if (err) {
+                        console.log(err);
+                    } else {
+                        arrResult = products;
+                    }
+                    return callback(arrResult);
+                });
+            }
         }
     });
 }

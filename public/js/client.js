@@ -150,3 +150,28 @@ function UpdateCheckoutCart() {
         http.send();
     }
 }
+
+// ==================== PRODUCT ====================
+function PostComment(productID) {
+    var content = document.getElementById('comment-content').value;
+    var user = document.getElementById('comment-username').value;
+
+    if (user == "" || user == undefined || content=="" || content==undefined) {
+        window.alert('Vui lòng nhập tên và nội dung bình luận');
+    } else {
+        var http = new XMLHttpRequest();        
+        http.open("POST", "/product.html/comment", true);
+        http.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
+        http.onreadystatechange = function () {
+            if (this.readyState == 4 && this.status == 200) {
+                if (this.response == 'true') {
+                    console.log('Da them binh luan');
+                } else {
+                    console.log('ERR: Khong the them binh luan');
+                }
+            }
+        }
+        http.send("user=" + user.toString() + "&content=" + content.toString() + "&productID=" + productID.toString());
+        document.getElementById('comment-content').value = "";
+    }
+}

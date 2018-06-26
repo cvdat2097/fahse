@@ -60,6 +60,10 @@ function GetRelatedProduct(productID, topN, callback) {
 // 2.1.6
 function GetAllProductComments(productID, callback) {
     DAL.QueryProductComments(productID, 0, function (comments) {
+        for (var x of comments) {
+            var y = new Date(x.date);
+            x.date = y.getDate() + "/" + y.getMonth() + "/" + y.getFullYear() + "  " + y.getHours() + ":" + y.getMinutes();
+        }
         callback(comments);
     })
 }
@@ -137,7 +141,7 @@ function ChangeItemInCart(sessionID, itemIndex, productID, quantity, color, size
                 size: size,
                 totalPrice: Number.parseInt(product.price) * Number.parseInt(quantity)
             }
-        
+
             DAL.UpdateItemInCart(sessionID, itemIndex, newCartDetail, function (success) {
                 callback(success);
             })
@@ -145,7 +149,7 @@ function ChangeItemInCart(sessionID, itemIndex, productID, quantity, color, size
             callback(false);
         }
     })
-    
+
 }
 
 // 2.1.13

@@ -112,6 +112,7 @@ var ProductPage = {
             optionObj.isLogged = req.isAuthenticated();
             
             res.render("product", {
+              _id: optionObj._id,
               images: optionObj.images,
               name: optionObj.name,
               price: optionObj.price,
@@ -122,7 +123,9 @@ var ProductPage = {
               category: optionObj.category,
               related_product: optionObj.relatedProducts,
               comment: commentList,
-              pagination: pagination
+              pagination: pagination,
+              isLogged: req.isAuthenticated(),
+              user: req.user
             });
           } else {
             res.send("Lỗi: Không thể lấy thông tin sản phẩm");

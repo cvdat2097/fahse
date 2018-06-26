@@ -109,9 +109,9 @@
 								<div class="pull-left meta">
 									<div class="title">
 										<a href="#">
-											<b>{{name}}</b>
+											<b>{{username}}</b>
 										</a>
-										made a post.
+										<span style="font-family: 'Courier New', Courier, monospace; font-size: 12px;" class="date">{{date}}</span>
 									</div>
 									<p>{{content}}</p>
 								</div>
@@ -137,14 +137,25 @@
 			{{!-- ADD COMMENT --}}
 			<div class="widget-area no-padding blank">
 				<div class="status-upload">
-					<form>
+					<div>
 						{{#if isLogged}}
-						<input type="text" name="username" value="{{user.username}}"/>
+						<div hidden>
+							<input id="comment-username" type="text" name="username" value="{{user.username}}" />
+						</div>
+						{{else}}
+						<div>
+							<input id="comment-username" placeholder="Tên hiển thị" type="text" name="username" style="width:100%;margin-bottom:10px;" />
+						</div>
 						{{/if}}
-						<textarea placeholder="Your comment" name="comment"></textarea>
-						<a href="/product.html?product=5b2fd7d4c9235a1d00140a55&page=0" class="btn btn-success green">
-							<i class="fa fa-share"></i> Bình luận</a>
-					</form>
+						<div>
+							<textarea style="width:100%;min-height: 80px; max-height: 200px;margin-bottom:10px;" id="comment-content" placeholder="Nội dung bình luận" name="comment"></textarea>
+						</div>
+						<div style="width: 100%">
+							<button style="margin: auto;" class="btn btn-success green" onclick="PostComment('{{_id}}')">
+								<i class="fa fa-share"></i> Bình luận
+							</button>
+						</div>
+					</div>
 				</div>
 			</div>
 			<!--  -->

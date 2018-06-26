@@ -5,6 +5,7 @@ var Category = require('../models/categoryModel.js');
 var Product = require('../models/productModel.js');
 var CONST = require('../config');
 var DAL = require('../models/DAL');
+var nodemailer = require('nodemailer');
 
 // ============== DEBUG business.js ============
 var router = express.Router();
@@ -137,7 +138,7 @@ function ChangeItemInCart(sessionID, itemIndex, productID, quantity, color, size
                 size: size,
                 totalPrice: Number.parseInt(product.price) * Number.parseInt(quantity)
             }
-        
+
             DAL.UpdateItemInCart(sessionID, itemIndex, newCartDetail, function (success) {
                 callback(success);
             })
@@ -145,7 +146,7 @@ function ChangeItemInCart(sessionID, itemIndex, productID, quantity, color, size
             callback(false);
         }
     })
-    
+
 }
 
 // 2.1.13
@@ -183,6 +184,10 @@ function RegisterNewUser(type, username, password, name, email, phone, address, 
             }
 
             DAL.CreateUser(newUser, function (success) {
+                if (success == true) {
+                    SendEmail(newUser.email, '/login.html/activate-email?username=' + newUser.username + '&key=' + newUser.emailActivationCode);
+                    console.log('activation email sent');
+                }
                 callback(success);
                 cb();
             })
@@ -348,6 +353,31 @@ function GetTotalPriceCart(cartDetail) {
     return totalPrice;
 }
 
+function SendEmail(to, content) {
+    var transporter = nodemailer.createTransport({
+        service: "Yandex",
+        auth: {
+            user: 'fasheactivation@yandex.com',
+            pass: 'Web123456789'
+        }
+    });
+
+    var mailOptions = {
+        from: 'fasheactivation@yandex.com',
+        to: to,
+        subject: 'Email activation',
+        text: content
+    };
+
+    transporter.sendMail(mailOptions, function (error, info) {
+        if (error) {
+            console.log(error);
+        } else {
+            console.log('Email sent: ' + info.response);
+        }
+    });
+}
+
 var exportObj = {
     GetAllProduct: GetAllProduct,
     GetProductByPageIndex: GetProductByPageIndex,
@@ -373,7 +403,8 @@ var exportObj = {
     Order: Order,
     IncreaseProductView: IncreaseProductView,
     ToCurrencyFormat: ToCurrencyFormat,
-    GetTotalPriceCart: GetTotalPriceCart
+    GetTotalPriceCart: GetTotalPriceCart,
+    SendEmail: SendEmail
 };
 
 module.exports = exportObj;

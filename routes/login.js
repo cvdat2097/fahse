@@ -5,6 +5,7 @@ var lib = require('./lib');
 var User = require('../models/userModel.js');
 var renderer = require('../views/renderer');
 var passport = require('passport');
+var business = require('../controller/business');
 
 
 router.get('/', function (req, res, next) {
@@ -29,6 +30,30 @@ router.post('/', function (req, res, next) {
             res.redirect('/login.html')
         }
     })(req, res, next);
+});
+
+router.get('/activate-email', function (req, res, next) { 
+    var key = req.param('key');
+    var username = req.param('username');
+
+    if (key != undefined) {
+        business.GetUser(username, function (user) {
+            if (user == null) {
+                // failed
+                console.log(err);
+                res.send('Không tìm thấy user');
+            } else {
+                if (user.emailActivationCode.toString() === key.toString()) {
+                    res.send('Kích hoạt thành công!');
+                    User.updateOne({ username: username }, { emailIsActivated: true }, function (err) {
+                        if (err) console.log(err);
+                    })
+                } else {
+                    res.send('Mã kích hoạt không đúng hoặc đã hết hạn');
+                }
+            }
+        })
+    }
 });
 
 module.exports = router;

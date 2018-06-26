@@ -3,6 +3,7 @@ var async = require('async');
 const mongoose = require('mongoose');
 var Category = require('../models/categoryModel.js');
 var Product = require('../models/productModel.js');
+var User = require('../models/userModel');
 var CONST = require('../config');
 var DAL = require('../models/DAL');
 var nodemailer = require('nodemailer');
@@ -162,11 +163,7 @@ function RegisterNewUser(type, username, password, name, email, phone, address, 
     async.series([
         function (cb) {
             // Generate email activation code
-            var possible = CONST.EMAIL_ACTIVATION_KEY;
-
-            for (var i = 0; i < 15; i++) {
-                code += possible.charAt(Math.floor(Math.random() * possible.length));
-            }
+            code = GenerateEmailActivationCode();
             cb();
         },
 
@@ -378,6 +375,33 @@ function SendEmail(to, content) {
     });
 }
 
+function GenerateEmailActivationCode() {
+    var code = "";
+    var possible = CONST.EMAIL_ACTIVATION_KEY;
+
+    for (var i = 0; i < 15; i++) {
+        code += possible.charAt(Math.floor(Math.random() * possible.length));
+    }
+
+    return code;
+}
+
+function ForgotPassword(username) {
+    var newPassword = GenerateEmailActivationCode();
+    User.updateOne({ username: username }, {
+        password: newPassword
+    }, function (err) {
+        if (err) {
+            console.log('forget password feature is not working');
+        }
+
+        GetUser(username, function (user) {
+            SendEmail(user.email, 'Mật khẩu mới: ' + user.password);
+        })
+    })
+
+}
+
 var exportObj = {
     GetAllProduct: GetAllProduct,
     GetProductByPageIndex: GetProductByPageIndex,
@@ -404,7 +428,8 @@ var exportObj = {
     IncreaseProductView: IncreaseProductView,
     ToCurrencyFormat: ToCurrencyFormat,
     GetTotalPriceCart: GetTotalPriceCart,
-    SendEmail: SendEmail
+    SendEmail: SendEmail,
+    ForgotPassword: ForgotPassword
 };
 
 module.exports = exportObj;

@@ -1,6 +1,4 @@
 // product-list
-var business = require('./../../controller/business.js');
-var emailExistence = require('email-existence');
 // Request a page base on pageIndex
 function requestProductListByPageIndex(pageIndex) {
     var http = new XMLHttpRequest();
@@ -9,8 +7,6 @@ function requestProductListByPageIndex(pageIndex) {
         if (this.readyState == 4 && this.status == 200) {
             var parser = new DOMParser();
             var xmlDoc = parser.parseFromString(this.responseText, "text/xml");
-
-
             document.getElementById('product-list-page').innerHTML = this.response;
 
         }
@@ -132,40 +128,36 @@ function Order() {
 }
 function checkInforRegister(username, password, name, email, phone, address, verifypassword) {
   var warningText = document.getElementById("warning");
-  if (username == "") {
-    warningText.innerHTML = "username is empty";
+  if (name == "") {
+    warningText.innerHTML = "Chưa nhập tên";
     return false;
   }
-  if (name == "") {
-    warningText.innerHTML = "Full name is required";
+  if (username == "") {
+    warningText.innerHTML = "Chưa nhập tên đăng nhập";
     return false;
   }
   if (email == "") {
-    warningText.innerHTML = "Email is required";
+    warningText.innerHTML = "Chưa nhập email";
     return false;
   }
   if (phone == "") {
-    warningText.innerHTML = "Phone number is required";
-    return false;
-  }
-  if (username == "") {
-    warningText.innerHTML = "Username is required";
+    warningText.innerHTML = "Chưa nhập số điện thoại";
     return false;
   }
   if (address == "") {
-    warningText.innerHTML = "Address is required";
+    warningText.innerHTML = "Chưa nhập địa chỉ";
     return false;
   }
   if (password == "") {
-    warningText.innerHTML = "Password is required";
+    warningText.innerHTML = "Chưa nhập mật khẩu";
     return false;
   }
   if (password != verifypassword) {
-    warningText.innerHTML = "Password not matched";
+    warningText.innerHTML = "Mật khẩu không khớp";
     return false;
   }
-    warningText.innerHTML = "";
-    RegisterNewUser('customer', username, password, name, email, phone, address,function (username){});
-    alert("Register successfully");
-    return true;
+  //xu ly tren server
+
+  
+  return true;
 }

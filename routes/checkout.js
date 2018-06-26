@@ -30,29 +30,40 @@ router.get('/updatecart', function (req, res, next) {
   var quantity = req.param('quantity');
   var itemIndex = req.param('itemIndex');
 
-  Cart.findOne({ session: req.sessionID }, function (err, cart) {
+  var data = req.param('data');
+
+  Cart.findOne({ session: req.sessionID }, function (err, cartFound) {
     if (err) {
       console.log(err);
       res.send('false');
-    } else if (cart && cart != null) {
+    } else if (cartFound && cartFound != null) {
       async.series([
         function (cb) {
-          cart.detail[itemIndex].quantity = Number.parseInt(quantity);
-          cb();
+          for (var i = 0; i < data.length; i++) {
+            for (var y of cartFound.detail) {
+              if (y.product.toString() === data[i]._id.toString()) {
+                y.quantity = data[i].quantity;
+              }
+            }
+            if (i == data.length - 1) {
+              cb();
+            }
+          }
         },
 
         function (cb) {
-          Cart.replaceOne({ session: req.sessionID }, cart, function (err) {
+          Cart.replaceOne({ session: req.sessionID }, cartFound, function (err) {
             if (err) {
               console.log(err);
               res.send('false');
+              cb();
             } else {
               res.send('true');
+              cb();
             }
-            cb();
           })
         }
-      ]);
+      ])
     } else {
       res.send('false');
     }

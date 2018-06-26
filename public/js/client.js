@@ -134,13 +134,23 @@ function Order() {
 function UpdateCheckoutCart() {
     var itemID = document.querySelectorAll(".item-productid");
     var itemQuantity = document.querySelectorAll(".item-productquantity");
+    var itemProductID = document.querySelectorAll(".item-productid");
 
+    var dataArray = [];
+
+    for (var i = 0; i < itemID.length; i++) {
+        dataArray.push({
+            _id: itemProductID[i].innerHTML,
+            quantity: itemQuantity[i].value
+        })
+    }
 
     for (var i = 0; i < itemID.length; i++) {
         var http = new XMLHttpRequest();
         http.open("GET", "/checkout.html/updatecart/?productID=" + itemID[i].innerHTML.toString() +
             "&quantity=" + itemQuantity[i].value.toString() +
-            "&itemIndex=" + i.toString(), true);
+            "&itemIndex=" + i.toString() +
+            "&data=" + JSON.stringify(dataArray), true);
         http.onreadystatechange = function () {
             if (this.readyState == 4 && this.status == 200) {
                 console.log(this.response);

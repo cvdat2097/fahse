@@ -81,10 +81,12 @@ var ProductPage = {
           for (let i = 0; i < totalPage; i++) {
             pagination[i] = { page: i, _id: productID };
           }
-          if (parseInt(page) + 4 < commentList.length) {
-            commentList = commentList.slice(parseInt(page), parseInt(page) + 4);
+          let posStart  = page? parseInt(page)*4:0;
+          let posEnd = posStart + 4;
+          if (posEnd < commentList.length) {
+            commentList = commentList.slice(posStart,posEnd);
           } else {
-            commentList = commentList.slice(parseInt(page), commentList.length - 1);
+            commentList = commentList.slice(posStart, commentList.length - 1);
           }
           console.log(commentList);
           cb();
@@ -137,6 +139,8 @@ var ProductPage = {
   }
 };
 
+let pagi = [];
+
 var ProductListPage = {
   // By Category
   RenderProductListPageCategory: function RenderProductListPageCategory(
@@ -162,16 +166,25 @@ var ProductListPage = {
       function (cb) {
         var optionObj = {};
         var categoryID = req.param("category");
-        var pageIndex = req.param("currentPage") ? req.param("currentPage") : 1;
+        var pageIndex = req.param("page") ? req.param("page") : 1;
 
         business.GetProductByCategoryID(categoryID, pageIndex, function (
           products,
           nProducts
         ) {
+          if(pageIndex==1){
+            let slPage =  products.length%CONST.PRODUCT_PER_PAGE ? products.length/CONST.PRODUCT_PER_PAGE +1 : products.length/CONST.PRODUCT_PER_PAGE;
+            pagi = [];
+            for(let i =1 ;i<=slPage;i++){
+              pagi [i] = {page:i,extendLink:"?category="+categoryID+"&page="+i};
+            }
+            products = products.slice(0,products.length<=9?products.length:9)
+          }
           optionObj.productList = products;
           optionObj.categoryList = categoryList;
-          optionObj.nPage = Math.floor(nProducts / CONST.PRODUCT_PER_PAGE) + 1;
+          // optionObj.nPage = Math.floor(nProducts / CONST.PRODUCT_PER_PAGE) + 1;
           optionObj.currentPage = pageIndex;
+          optionObj.pagination = pagi;
 
           optionObj.isLogged = req.isAuthenticated();
           res.render("product-list", optionObj);
@@ -197,7 +210,7 @@ var ProductListPage = {
 
       // ROUTING
       function (cb) {
-        var pageIndex = req.param("pageindex");
+        var pageIndex = req.param("page");
         pageIndex = pageIndex && pageIndex > 0 ? pageIndex : 0;
 
         queryObj = {
@@ -210,9 +223,18 @@ var ProductListPage = {
         };
 
         business.GetProductByPageIndex(queryObj, pageIndex, function (products) {
+          if(pageIndex==0){
+            pagi = [];
+            let slPage =  products.length%CONST.PRODUCT_PER_PAGE ? products.length/CONST.PRODUCT_PER_PAGE +1 : products.length/CONST.PRODUCT_PER_PAGE;
+            for(let i =1 ;i<=slPage;i++){
+              pagi [i] = {page:i,extendLink:"?page="+i};
+            }
+            products = products.slice(0,products.length<=9?products.length:9)
+          }
           var optionObj = {
             productList: products,
-            categoryList: categoryList
+            categoryList: categoryList,
+            pagination: pagi
           };
           optionObj.isLogged = req.isAuthenticated();
 

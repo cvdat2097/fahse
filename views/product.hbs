@@ -122,17 +122,11 @@
 			</div>
 			{{/each}} {{!-- PHAN TRANG --}}
 			<ul class="pagination" style="margin:10px auto">
-				<li class="page-item disabled">
-					<span class="page-link">Previous</span>
-				</li>
 				{{#each pagination}}
 				<li class="page-item">
 					<a class="page-link" href="product.html?product={{_id}}&page={{page}}">{{page}}</a>
 				</li>
 				{{/each}}
-				<li class="page-item">
-					<a class="page-link" href="#">Next</a>
-				</li>
 			</ul>
 			{{!-- ADD COMMENT --}}
 			<div class="widget-area no-padding blank">

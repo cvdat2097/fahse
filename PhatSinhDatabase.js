@@ -173,7 +173,7 @@ async.series([
     function (callback) {
         console.log('Connecting to database...');
         // mongoose.connect('mongodb://admin:123456@ds119490.mlab.com:19490/shoppingdb', callback);
-        mongoose.connect('mongodb://localhost:27017/shoppingDB', callback);
+        mongoose.connect('mongodb://localhost:27017/database', callback);
     },
 
     function (callback) {
@@ -273,7 +273,7 @@ async.series([
             ["images/product/AK_AD_0000_0.jpg", "images/product/AK_AD_0000_1.jpg", "images/product/AK_AD_0000_2.jpg"],
             categoryList[1],
             [],
-            [{"name":"chung","content":"Nhin chan"},{"name":"chung","content":"Nhin chan"},{"name":"chung","content":"Nhin chan"},{"name":"chung","content":"Nhin chan"},{"name":"chung","content":"Nhin chan"},{"name":"chung","content":"Nhin chan"},{"name":"chung","content":"Nhin chan"},{"name":"chung","content":"Nhin chan"},{"name":"chung","content":"Nhin chan"},{"name":"chung","content":"Nhin chan"},{"name":"chung","content":"Nhin chan"},{"name":"chung","content":"Nhin chan"},{"name":"chung","content":"Nhin chan"},{"name":"chung","content":"Nhin chan"},{"name":"chung","content":"Nhin chan"},{"name":"chung","content":"Nhin chan"},{"name":"chung","content":"Nhin chan"}],
+            [],
             callback);
     },
     function (callback) {

@@ -129,3 +129,24 @@ function Order() {
 
     http.send();
 }
+
+
+function UpdateCheckoutCart() {
+    var itemID = document.querySelectorAll(".item-productid");
+    var itemQuantity = document.querySelectorAll(".item-productquantity");
+
+
+    for (var i = 0; i < itemID.length; i++) {
+        var http = new XMLHttpRequest();
+        http.open("GET", "/checkout.html/updatecart/?productID=" + itemID[i].innerHTML.toString() +
+            "&quantity=" + itemQuantity[i].value.toString() +
+            "&itemIndex=" + i.toString(), true);
+        http.onreadystatechange = function () {
+            if (this.readyState == 4 && this.status == 200) {
+                console.log(this.response);
+            }
+        }
+        console.log("sent");
+        http.send();
+    }
+}

@@ -138,9 +138,12 @@
 			<div class="widget-area no-padding blank">
 				<div class="status-upload">
 					<form>
+						{{#if isLogged}}
+						<input type="text" name="username" value="{{user.username}}"/>
+						{{/if}}
 						<textarea placeholder="Your comment" name="comment"></textarea>
 						<a href="/product.html?product=5b2fd7d4c9235a1d00140a55&page=0" class="btn btn-success green">
-							<i class="fa fa-share"></i> Comment</a>
+							<i class="fa fa-share"></i> Bình luận</a>
 					</form>
 				</div>
 			</div>

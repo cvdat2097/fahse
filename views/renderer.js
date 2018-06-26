@@ -20,23 +20,23 @@ var IndexPage = {
     var categoryList;
 
     async.series([
-      function(cb) {
-        business.GetTopProducts(10, function(products) {
+      function (cb) {
+        business.GetTopProducts(10, function (products) {
           productList = products;
           console.log(productList);
           cb();
         });
       },
 
-      function(cb) {
-        business.GetAllCategory(function(cats) {
+      function (cb) {
+        business.GetAllCategory(function (cats) {
           categoryList = cats;
           cb();
         });
       },
 
       // ROUTING
-      function(cb) {
+      function (cb) {
         res.render("index", {
           productList: productList,
           categoryList: categoryList,
@@ -57,43 +57,43 @@ var ProductPage = {
     var pagination;
 
     async.series([
-      function(cb) {
-        Category.find({}, function(err, categories) {
+      function (cb) {
+        Category.find({}, function (err, categories) {
           categoryList = categories;
           cb();
         });
       }
       ,
-      function(cb) {
+      function (cb) {
         let productID = req.param("product");
-        business.GetRelatedProduct(productID, 1, function(products) {
+        business.GetRelatedProduct(productID, 1, function (products) {
           productList = products;
           cb();
         });
       },
-      function(cb) {
+      function (cb) {
         let productID = req.param("product");
         let page = req.param("page");
-        business.GetAllProductComments(productID, function(comments) {
+        business.GetAllProductComments(productID, function (comments) {
           commentList = comments;
           pagination = [];
-          let totalPage = commentList.length/4;
-          for(let i=0;i<totalPage;i++){
-              pagination[i]={page : i,_id:productID};
+          let totalPage = commentList.length / 4;
+          for (let i = 0; i < totalPage; i++) {
+            pagination[i] = { page: i, _id: productID };
           }
-          if(parseInt(page)+4<commentList.length){
-            commentList = commentList.slice(parseInt(page),parseInt(page)+4);
-          }else{
-            commentList = commentList.slice(parseInt(page),commentList.length-1);
+          if (parseInt(page) + 4 < commentList.length) {
+            commentList = commentList.slice(parseInt(page), parseInt(page) + 4);
+          } else {
+            commentList = commentList.slice(parseInt(page), commentList.length - 1);
           }
           console.log(commentList);
           cb();
         });
       },
       // ROUTING
-      function(cb) {
+      function (cb) {
         var productID = req.param("product");
-        business.GetProduct(productID, function(product) {
+        business.GetProduct(productID, function (product) {
           if (product != null && product) {
             var optionObj = product;
 
@@ -108,10 +108,9 @@ var ProductPage = {
                 }
               }
             }
-            business.IncreaseProductView(product._id.toString(), 1, function(
-              success
-            ) {});
+            business.IncreaseProductView(product._id.toString(), 1, function (success) { });
             optionObj.isLogged = req.isAuthenticated();
+            
             res.render("product", {
               images: optionObj.images,
               name: optionObj.name,
@@ -121,7 +120,7 @@ var ProductPage = {
               color: optionObj.color,
               view: optionObj.view,
               category: optionObj.category,
-              related_product: productList,
+              related_product: optionObj.relatedProducts,
               comment: commentList,
               pagination: pagination
             });
@@ -147,8 +146,8 @@ var ProductListPage = {
     var listName;
 
     async.series([
-      function(cb) {
-        business.GetAllCategory(function(result) {
+      function (cb) {
+        business.GetAllCategory(function (result) {
           if (result != undefined) {
             categoryList = result;
             cb();
@@ -157,12 +156,12 @@ var ProductListPage = {
       },
 
       // ROUTING
-      function(cb) {
+      function (cb) {
         var optionObj = {};
         var categoryID = req.param("category");
         var pageIndex = req.param("currentPage") ? req.param("currentPage") : 1;
 
-        business.GetProductByCategoryID(categoryID, pageIndex, function(
+        business.GetProductByCategoryID(categoryID, pageIndex, function (
           products,
           nProducts
         ) {
@@ -184,8 +183,8 @@ var ProductListPage = {
     var categoryList;
 
     async.series([
-      function(cb) {
-        business.GetAllCategory(function(result) {
+      function (cb) {
+        business.GetAllCategory(function (result) {
           if (result != undefined) {
             categoryList = result;
             cb();
@@ -194,7 +193,7 @@ var ProductListPage = {
       },
 
       // ROUTING
-      function(cb) {
+      function (cb) {
         var pageIndex = req.param("pageindex");
         pageIndex = pageIndex && pageIndex > 0 ? pageIndex : 0;
 
@@ -207,7 +206,7 @@ var ProductListPage = {
           sorting: req.param("sorting")
         };
 
-        business.GetProductByPageIndex(queryObj, pageIndex, function(products) {
+        business.GetProductByPageIndex(queryObj, pageIndex, function (products) {
           var optionObj = {
             productList: products,
             categoryList: categoryList
@@ -228,7 +227,7 @@ var ProductListPage = {
 };
 
 var CheckoutPage = {
-  RenderCheckoutPage: function RenderCheckoutPage(req, res, next) {}
+  RenderCheckoutPage: function RenderCheckoutPage(req, res, next) { }
 };
 
 var LoginPage = {
@@ -282,7 +281,7 @@ var AdminPage = {
       res.redirect("/login.html");
       res.end();
     } else {
-      business.GetAllProduct(function(products) {
+      business.GetAllProduct(function (products) {
         if (products == null) {
           res.send("Lỗi: Không thể lấy danh sách sản phẩm");
         } else {
@@ -308,7 +307,7 @@ var AdminPage = {
       res.redirect("/login.html");
       res.end();
     } else {
-      User.find({}, function(err, users) {
+      User.find({}, function (err, users) {
         if (users == null) {
           res.send("Lỗi: Không thể lấy danh sách người dùng");
         } else {
@@ -334,7 +333,7 @@ var AdminPage = {
       res.redirect("/login.html");
       res.end();
     } else {
-      Order.find({}, function(err, orders) {
+      Order.find({}, function (err, orders) {
         if (orders == null) {
           res.send("Lỗi: Không thể lấy danh sách đơn hàng");
         } else {
@@ -360,19 +359,19 @@ var CheckoutPage = {
     var cartDetail = [];
     optionObj.isLogged = req.isAuthenticated();
     // var sessionId = req.sessionID;
-    business.GetCart(req.sessionID, function(cart) {
+    business.GetCart(req.sessionID, function (cart) {
       if (cart == null || cart.detail.length == 0) {
         optionObj.cartIsEmpty = true;
         res.render("checkout", optionObj);
       } else {
         async.series([
-          function(cb1) {
+          function (cb1) {
             async.eachSeries(
               cart.detail,
-              function(currentCartDetail, cb) {
+              function (currentCartDetail, cb) {
                 business.GetProduct(
                   currentCartDetail.product.toString(),
-                  function(product) {
+                  function (product) {
                     if (product && product != null) {
                       cartDetail.push({
                         image: product.images[0],
@@ -388,7 +387,7 @@ var CheckoutPage = {
                   }.bind(currentCartDetail)
                 );
               },
-              function(err) {
+              function (err) {
                 if (err) {
                   console.log(err);
                 }
@@ -396,7 +395,7 @@ var CheckoutPage = {
               }
             );
           },
-          function(cb) {
+          function (cb) {
             optionObj.cartDetail = cartDetail;
             optionObj.cartIsEmpty = false;
             if (req.param("ajax") == "true") {
@@ -420,18 +419,18 @@ var CartForm = {
     optionObj.isLogged = req.isAuthenticated();
 
     // var sessionId = req.sessionID;
-    business.GetCart(req.sessionID, function(cart) {
+    business.GetCart(req.sessionID, function (cart) {
       if (cart == null || cart.detail.length == 0) {
         res.send("Giỏ hàng rỗng");
       } else {
         async.series([
-          function(cb1) {
+          function (cb1) {
             async.eachSeries(
               cart.detail,
-              function(currentCartDetail, cb) {
+              function (currentCartDetail, cb) {
                 business.GetProduct(
                   currentCartDetail.product.toString(),
-                  function(product) {
+                  function (product) {
                     if (product && product != null) {
                       cartDetail.push({
                         image: product.images[0],
@@ -447,7 +446,7 @@ var CartForm = {
                   }.bind(currentCartDetail)
                 );
               },
-              function(err) {
+              function (err) {
                 if (err) {
                   console.log(err);
                 }
@@ -455,7 +454,7 @@ var CartForm = {
               }
             );
           },
-          function(cb) {
+          function (cb) {
             optionObj.cartDetail = cartDetail;
             optionObj.layout = false;
 

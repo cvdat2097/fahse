@@ -157,15 +157,15 @@ function QueryRelatedProducts(productID, topN, callback) {
     var queryFunction = Product.findOne({
         _id: new mongoose.Types.ObjectId(productID)
     }, {
-        relatedProducts: 1
-    });
+            relatedProducts: 1
+        });
 
     queryFunction.exec(function (err, result) {
         if (err) {
             console.log(err);
         } else {
             let listID = [];
-            if(result!=null){
+            if (result != null) {
                 let temp = result.relatedProducts.slice(0, topN);
                 for (let i = 0; i < temp.length; i++) {
                     listID[i] = temp[i].product;
@@ -200,16 +200,16 @@ function QueryProductComments(productID, pageIndex, callback) {
         queryFunction = Product.findOne({
             _id: new mongoose.Types.ObjectId(productID)
         }, {
-            comment: {
-                $slice: [CONST.COMMENT_PER_PAGE * (pageIndex - 1), CONST.COMMENT_PER_PAGE]
-            }
-        });
+                comment: {
+                    $slice: [CONST.COMMENT_PER_PAGE * (pageIndex - 1), CONST.COMMENT_PER_PAGE]
+                }
+            });
     } else {
         queryFunction = Product.findOne({
             _id: new mongoose.Types.ObjectId(productID)
         }, {
-            comment: 1
-        });
+                comment: 1
+            });
     }
 
     queryFunction.exec(function (err, result) {
@@ -231,17 +231,17 @@ function InsertProductComments(productID, comment, callback) {
     Product.update({
         _id: new mongoose.Types.ObjectId(productID)
     }, {
-        $push: {
-            comment: comment
-        }
-    }, function (err) {
-        if (err) {
-            console.log(err);
-            return callback(false);
-        } else {
-            return callback(true);
-        }
-    })
+            $push: {
+                comment: comment
+            }
+        }, function (err) {
+            if (err) {
+                console.log(err);
+                return callback(false);
+            } else {
+                return callback(true);
+            }
+        })
 }
 
 // 3.1.5
@@ -306,17 +306,17 @@ function InsertItemToCart(sessionID, newCartDetail, callback) {
                 Cart.update({
                     session: sessionID
                 }, {
-                    $push: {
-                        detail: newCartDetail
-                    }
-                }, function (err) {
-                    if (err) {
-                        console.log(err);
-                        return callback(false);
-                    } else {
-                        return callback(true);
-                    }
-                })
+                        $push: {
+                            detail: newCartDetail
+                        }
+                    }, function (err) {
+                        if (err) {
+                            console.log(err);
+                            return callback(false);
+                        } else {
+                            return callback(true);
+                        }
+                    })
             }
         }
     })
@@ -348,14 +348,14 @@ function UpdateItemInCart(sessionID, itemIndex, newCartDetail, callback) {
                 Cart.update({
                     session: sessionID
                 }, {
-                    $set: setObj
-                }, function (err) {
-                    if (err) {
-                        console.log(err)
-                    } else {
-                        callback(true);
-                    }
-                })
+                        $set: setObj
+                    }, function (err) {
+                        if (err) {
+                            console.log(err)
+                        } else {
+                            callback(true);
+                        }
+                    })
             }
         }
     })
@@ -379,27 +379,27 @@ function DeleteItemInCart(sessionID, itemIndex, callback) {
                 Cart.update({
                     session: sessionID
                 }, {
-                    $unset: unsetObj
-                }, function (err) {
-                    if (err) {
-                        console.log(err);
-                        callback(false);
-                    } else {
-                        Cart.update({
-                            session: sessionID
-                        }, {
-                            $pull: {
-                                "detail": null
-                            }
-                        }, function (err) {
-                            if (err) {
-                                console.log(err);
-                            } else {
-                                callback(true);
-                            }
-                        })
-                    }
-                });
+                        $unset: unsetObj
+                    }, function (err) {
+                        if (err) {
+                            console.log(err);
+                            callback(false);
+                        } else {
+                            Cart.update({
+                                session: sessionID
+                            }, {
+                                    $pull: {
+                                        "detail": null
+                                    }
+                                }, function (err) {
+                                    if (err) {
+                                        console.log(err);
+                                    } else {
+                                        callback(true);
+                                    }
+                                })
+                        }
+                    });
 
             }
         }
@@ -577,7 +577,7 @@ function InsertRelatedProduct(srcProductID, relatedProductID, callback) {
             var relatedProductsArray = srcProduct.relatedProducts;
 
             for (var i = 0; i < relatedProductsArray.length; i++) {
-                var firstObjectID = relatedProductsArray[i].product.toString();
+                var firstObjectID = relatedProductsArray[i]._id.toString();
                 var secondObjectID = relatedProductID.toString();
                 if (firstObjectID == secondObjectID) {
                     // related product is existing in related list of srcProduct
@@ -587,36 +587,35 @@ function InsertRelatedProduct(srcProductID, relatedProductID, callback) {
                     Product.updateOne({
                         _id: new mongoose.Types.ObjectId(srcProductID)
                     }, {
-                        $set: setObj
-                    }, function (err) {
-                        if (err) {
-                            console.log(err);
-                            return callback(false);
-                        } else {}
-                    });
+                            $set: setObj
+                        }, function (err) {
+                            if (err) {
+                                console.log(err);
+                                return callback(false);
+                            } else { }
+                        });
                     return callback(true);
                 }
             }
 
             // related product doesn't exist in related list of srcProduct
-            var newRelatedProductObj = {
-                product: new mongoose.Types.ObjectId(relatedProductID),
-                time: 1
-            }
-            Product.update({
-                _id: new mongoose.Types.ObjectId(srcProductID)
-            }, {
-                $push: {
-                    relatedProducts: newRelatedProductObj
-                }
-            }, function (err) {
-                if (err) {
-                    console.log(err);
-                    return callback(false);
-                } else {
-                    return callback(true);
-                }
-            })
+            Product.findOne({ _id: new mongoose.Types.ObjectId(relatedProductID) }, function (err, rProduct) {
+                rProduct.view = 1;
+                Product.update({
+                    _id: new mongoose.Types.ObjectId(srcProductID)
+                }, {
+                        $push: {
+                            relatedProducts: rProduct
+                        }
+                    }, function (err) {
+                        if (err) {
+                            console.log(err);
+                            return callback(false);
+                        } else {
+                            return callback(true);
+                        }
+                    });
+            });
         }
     })
 }

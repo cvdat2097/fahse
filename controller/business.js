@@ -102,15 +102,18 @@ function GetCart(sessionID, callback) {
 
 // 2.1.11
 function AddItemToCart(sessionID, productID, quantity, color, size, callback) {
-    
+
     GetProduct(productID, function (product) {
         if (product && product != null) {
             var cartDetal = {
                 product: new mongoose.Types.ObjectId(productID),
-                name: product.name, 
+                name: product.name,
                 quantity: quantity,
                 color: color,
-                size: size
+                size: size,
+                price: product.price,
+                image: product.images[0],
+                totalPrice: Number.parseInt(product.price) * Number.parseInt(quantity)
             }
 
             DAL.InsertItemToCart(sessionID, cartDetal, function (success) {
@@ -125,16 +128,24 @@ function AddItemToCart(sessionID, productID, quantity, color, size, callback) {
 
 // 2.1.12
 function ChangeItemInCart(sessionID, itemIndex, productID, quantity, color, size, callback) {
-    var newCartDetail = {
-        product: new mongoose.Types.ObjectId(productID),
-        quantity: quantity,
-        color: color,
-        size: size
-    }
-
-    DAL.UpdateItemInCart(sessionID, itemIndex, newCartDetail, function (success) {
-        callback(success);
+    GetProduct(productID, function (product) {
+        if (product && product != null) {
+            var newCartDetail = {
+                product: new mongoose.Types.ObjectId(productID),
+                quantity: quantity,
+                color: color,
+                size: size,
+                totalPrice: Number.parseInt(product.price) * Number.parseInt(quantity)
+            }
+        
+            DAL.UpdateItemInCart(sessionID, itemIndex, newCartDetail, function (success) {
+                callback(success);
+            })
+        } else {
+            callback(false);
+        }
     })
+    
 }
 
 // 2.1.13
@@ -198,7 +209,7 @@ function ValidateLogin(username, password, callback) {
 }
 
 // 2.1.17
-function ChangeUserInfo(username, name, phone, address,type, callback) {
+function ChangeUserInfo(username, name, phone, address, type, callback) {
     // Build new USER
     var newUser = {
         name: name,
@@ -322,6 +333,21 @@ function IncreaseProductView(productID, amount, callback) {
     })
 }
 
+// Convert a string number to currency format
+
+function ToCurrencyFormat(s) {
+    return s.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",")
+}
+
+function GetTotalPriceCart(cartDetail) {
+    var totalPrice = 0;
+
+    for (var y of cartDetail) {
+        totalPrice += y.price * Number.parseInt(y.quantity);
+    }
+    return totalPrice;
+}
+
 var exportObj = {
     GetAllProduct: GetAllProduct,
     GetProductByPageIndex: GetProductByPageIndex,
@@ -345,7 +371,9 @@ var exportObj = {
     GenerateCart: GenerateCart,
     GetProduct: GetProduct,
     Order: Order,
-    IncreaseProductView: IncreaseProductView
+    IncreaseProductView: IncreaseProductView,
+    ToCurrencyFormat: ToCurrencyFormat,
+    GetTotalPriceCart: GetTotalPriceCart
 };
 
 module.exports = exportObj;

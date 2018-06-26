@@ -126,6 +126,52 @@ function Order() {
 
     http.send();
 }
+function checkMail(email) {
+  var warningText = document.getElementById("warning");
+	var http = new XMLHttpRequest();
+	http.open("GET", "/register.html/checkemail?email=" + email.toString(), true);
+    http.onreadystatechange = function () {
+        if (this.readyState == 4 && this.status == 200) {
+              if (this.response == 'false') {
+                  warningText.innerHTML = "Email không  hợp lệ";
+              }
+        }
+    }
+	http.send();
+}
+function isPhoneNumber(username, password, name, email, phone, address) {
+    var warningText = document.getElementById("warning");
+	var http = new XMLHttpRequest();
+	http.open("GET", "/register.html/checkphonenumber?phone=" + phone.toString(), true);
+    http.onreadystatechange = function () {
+        if (this.readyState == 4 && this.status == 200) {
+                if (this.response == 'true') {
+                  warningText.innerHTML = "";
+                  registerUser(username, password, name, email, phone, address);
+                } else {
+                  warningText.innerHTML = "Số điện thoại không  hợp lệ";
+                }
+        }
+    }
+	http.send();
+}
+function registerUser(username, password, name, email, phone, address) {
+	var http = new XMLHttpRequest();
+  var warningText = document.getElementById("warning");
+	http.open("GET", "/register.html/registerUser?type=customer&username=" +  username.toString() + "&password=" + password.toString() + "&name=" + name.toString() + "&email=" + email.toString() + "&phone=" + phone.toString() + "&address=" + address.toString(), true);
+    http.onreadystatechange = function () {
+        if (this.readyState == 4 && this.status == 200) {
+                if (this.response == 'true') {
+                  alert("Đăng kí thành công");
+                }
+                else {
+                  alert("Không thể đăng kí. Vui lòng thử lại sau");
+                }
+        }
+    }
+	http.send();
+}
+
 function checkInforRegister(username, password, name, email, phone, address, verifypassword) {
   var warningText = document.getElementById("warning");
   if (name == "") {
@@ -156,8 +202,7 @@ function checkInforRegister(username, password, name, email, phone, address, ver
     warningText.innerHTML = "Mật khẩu không khớp";
     return false;
   }
-  //xu ly tren server
-
-  
+  checkMail(email);
+  isPhoneNumber(username, password, name, email, phone, address);
   return true;
 }

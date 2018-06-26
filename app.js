@@ -10,7 +10,6 @@ var session = require('express-session');
 var business = require('./controller/business');
 var passport = require('passport');
 var LocalStrategy = require('passport-local').Strategy;
-var mailer = require('express-mailer');
 
 var app = express();
 app.use(bodyParser.json());

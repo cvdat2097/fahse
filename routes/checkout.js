@@ -24,13 +24,13 @@ router.get('/', function (req, res, next) {
   }
 });
 
-router.get('/updatecart', function (req, res, next) {
+router.post('/updatecart', function (req, res, next) {
 
   var productID = req.param('productID');
   var quantity = req.param('quantity');
   var itemIndex = req.param('itemIndex');
 
-  var data = req.param('data');
+  var data = JSON.parse(req.param('data'));
 
   Cart.findOne({ session: req.sessionID }, function (err, cartFound) {
     if (err) {

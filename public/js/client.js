@@ -147,16 +147,17 @@ function UpdateCheckoutCart() {
 
     for (var i = 0; i < itemID.length; i++) {
         var http = new XMLHttpRequest();
-        http.open("GET", "/checkout.html/updatecart/?productID=" + itemID[i].innerHTML.toString() +
-            "&quantity=" + itemQuantity[i].value.toString() +
-            "&itemIndex=" + i.toString() +
-            "&data=" + JSON.stringify(dataArray), true);
+        http.open("POST", "/checkout.html/updatecart/", true);
+        http.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
         http.onreadystatechange = function () {
             if (this.readyState == 4 && this.status == 200) {
                 console.log(this.response);
             }
         }
         console.log("sent");
-        http.send();
+        http.send("?productID=" + itemID[i].innerHTML.toString() +
+            "&quantity=" + itemQuantity[i].value.toString() +
+            "&itemIndex=" + i.toString() +
+            "&data=" + JSON.stringify(dataArray));
     }
 }

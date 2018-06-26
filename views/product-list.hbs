@@ -185,8 +185,10 @@
 
 					<!-- Pagination -->
 					<div class="pagination flex-m flex-w p-t-26 ">
-						{{#paginate nPage currentPage}}
-						{{/paginate}}
+						{{#each pagination}}
+							{{!-- <a href="product-list.html?page={{page}}" class="item-pagination flex-c-m trans-0-4">{{page}}</a> --}}
+							<a href="product-list.html{{extendLink}}" class="item-pagination flex-c-m trans-0-4">{{page}}</a>
+						{{/each}}
 					</div>
 				</div>
 			</div>

@@ -6,18 +6,10 @@ var User = require('../models/userModel.js');
 var renderer = require('../views/renderer');
 var passport = require('passport');
 
-// router.post('/', function (req, res, next) {
-//     renderer.LoginPage.RenderLoginPagePOST(req, res, next);
-// });
 
 router.get('/', function (req, res, next) {
     renderer.LoginPage.RenderLoginPageGET(req, res, next);
 });
-
-// router.post('/', passport.authenticate('local', {
-//     failureRedirect: '/fail',
-//     successRedirect: '/login-success'
-// }))
 
 router.post('/', function (req, res, next) {
     passport.authenticate('local', function (err, user, info) {
@@ -31,10 +23,8 @@ router.post('/', function (req, res, next) {
             if (user.type == "customer") {
                 res.redirect('/');
             } else if (user.type == "admin") {
-                res.redirect('/admin.html');
+                res.redirect('/admin');
             }
-
-
         } else {
             res.redirect('/login.html')
         }

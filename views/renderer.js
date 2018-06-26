@@ -1,447 +1,491 @@
-var express = require('express');
-var Handlebars = require('express-handlebars');
-var async = require('async');
-var business = require('../controller/business');
-var CONST = require('../config');
-var dal = require('../models/DAL');
+var express = require("express");
+var Handlebars = require("express-handlebars");
+var async = require("async");
+var business = require("../controller/business");
+var CONST = require("../config");
+var dal = require("../models/DAL");
+var mongoose = require("mongoose");
 
 // Mongoose models
-var Cart = require('../models/cartModel');
-var Category = require('../models/categoryModel');
-var Order = require('../models/orderModel');
-var Product = require('../models/productModel');
-var User = require('../models/userModel');
-
+var Cart = require("../models/cartModel");
+var Category = require("../models/categoryModel");
+var Order = require("../models/orderModel");
+var Product = require("../models/productModel");
+var User = require("../models/userModel");
 
 var IndexPage = {
-    // index.html & /
-    RenderIndexPage: function RenderIndexPage(req, res, next) {
-        var productList;
-        var categoryList;
+  // index.html & /
+  RenderIndexPage: function RenderIndexPage(req, res, next) {
+    var productList;
+    var categoryList;
 
-        async.series([
-            function (cb) {
-                Product.find({}, function (err, products) {
-                    productList = products;
-                    cb();
-                });
-            },
+    async.series([
+      function (cb) {
+        business.GetTopProducts(10, function (products) {
+          productList = products;
+          console.log(productList);
+          cb();
+        });
+      },
 
-            function (cb) {
-                Category.find({}, function (err, cats) {
-                    categoryList = cats;
-                    cb();
-                });
-            },
+      function (cb) {
+        business.GetAllCategory(function (cats) {
+          categoryList = cats;
+          cb();
+        });
+      },
 
-            // ROUTING
-            function (cb) {
-                res.render('index', {
-                    productList: productList,
-                    categoryList: categoryList,
-                    listName: "DANH SÁCH SẢN PHẨM"
-                });
-                cb();
-            }
-        ]);
-    }
-}
+      // ROUTING
+      function (cb) {
+        res.render("index", {
+          productList: productList,
+          categoryList: categoryList,
+          listName: "SẢN PHẨM BÁN CHẠY",
+          isLogged: req.isAuthenticated()
+        });
+        cb();
+      }
+    ]);
+  }
+};
 
 var ProductPage = {
-    RenderProductPage: function RenderProductPage(req, res, next) {
-        var categoryList;
+  RenderProductPage: function RenderProductPage(req, res, next) {
+    var categoryList;
+    var productList;
+    var commentList;
+    var pagination;
 
-        async.series([
-            function (cb) {
-                Category.find({}, function (err, categories) {
-                    categoryList = categories;
-                    cb();
-                });
-            },
+    async.series([
+      function (cb) {
+        Category.find({}, function (err, categories) {
+          categoryList = categories;
+          cb();
+        });
+      }
+      ,
+      function (cb) {
+        let productID = req.param("product");
+        business.GetRelatedProduct(productID, 1, function (products) {
+          productList = products;
+          cb();
+        });
+      },
+      function (cb) {
+        let productID = req.param("product");
+        let page = req.param("page");
+        business.GetAllProductComments(productID, function (comments) {
+          commentList = comments;
+          pagination = [];
+          let totalPage = commentList.length / 4;
+          for (let i = 0; i < totalPage; i++) {
+            pagination[i] = { page: i, _id: productID };
+          }
+          let posStart  = page? parseInt(page)*4:0;
+          let posEnd = posStart + 4;
+          if (posEnd < commentList.length) {
+            commentList = commentList.slice(posStart,posEnd);
+          } else {
+            commentList = commentList.slice(posStart, commentList.length - 1);
+          }
+          console.log(commentList);
+          cb();
+        });
+      },
+      // ROUTING
+      function (cb) {
+        var productID = req.param("product");
+        business.GetProduct(productID, function (product) {
+          if (product != null && product) {
+            var optionObj = product;
 
-            // ROUTING
-            function (cb) {
-                var Product = require('../models/productModel.js');
-                Product.find({ _id: req.param('product') }, function (err, products) {
-
-                    var optionObj = products[0];
-                    optionObj.categoryList = categoryList;
-
-                    for (var x of categoryList) {
-                        if (optionObj.category[0] == x._id.toString()) {
-                            optionObj.category = x.name;
-                            optionObj.categoryID = x._id.toString();
-                        }
-                    }
-
-                    res.render('product', optionObj);
-                });
-                cb();
+            for (var i = 0; i < product.category.length; i++) {
+              for (var x of categoryList) {
+                if (optionObj.category[i].toString() === x._id.toString()) {
+                  optionObj.category[i] = {
+                    name: x.name,
+                    id: x._id.toString()
+                  };
+                  break;
+                }
+              }
             }
-        ]);
-    }
+            business.IncreaseProductView(product._id.toString(), 1, function (success) { });
+            optionObj.isLogged = req.isAuthenticated();
+            
+            res.render("product", {
+              _id: optionObj._id,
+              images: optionObj.images,
+              name: optionObj.name,
+              price: optionObj.price,
+              descripton: optionObj.descripton,
+              size: optionObj.size,
+              color: optionObj.color,
+              view: optionObj.view,
+              category: optionObj.category,
+              related_product: optionObj.relatedProducts,
+              comment: commentList,
+              pagination: pagination,
+              isLogged: req.isAuthenticated(),
+              user: req.user
+            });
+          } else {
+            res.send("Lỗi: Không thể lấy thông tin sản phẩm");
+          }
+        });
+        cb();
+      }
+    ]);
+  }
+};
 
-}
+let pagi = [];
 
 var ProductListPage = {
-    // By Category
-    RenderProductListPageCategory: function RenderProductListPageCategory(req, res, next) {
-        var productList = [];
-        var categoryList;
-        var listName;
+  // By Category
+  RenderProductListPageCategory: function RenderProductListPageCategory(
+    req,
+    res,
+    next
+  ) {
+    var productList = [];
+    var categoryList;
+    var listName;
 
-        async.series([
-            function (cb) {
-                business.GetAllCategory(function (result) {
-                    if (result != undefined) {
-                        categoryList = result;
-                        cb();
-                    }
-                });
-            },
+    async.series([
+      function (cb) {
+        business.GetAllCategory(function (result) {
+          if (result != undefined) {
+            categoryList = result;
+            cb();
+          }
+        });
+      },
 
-            // ROUTING
-            function (cb) {
-                var optionObj = {};
-                var categoryID = req.param('category');
-                var pageIndex = req.param('currentPage') ? req.param('currentPage') : 1;
+      // ROUTING
+      function (cb) {
+        var optionObj = {};
+        var categoryID = req.param("category");
+        var pageIndex = req.param("page") ? req.param("page") : 1;
 
-                business.GetProductByCategoryID(categoryID, pageIndex, function (products, nProducts) {
-                    optionObj.productList = products;
-                    optionObj.categoryList = categoryList;
-                    optionObj.nPage = Math.floor(nProducts / CONST.PRODUCT_PER_PAGE) + 1;
-                    optionObj.currentPage = pageIndex;
-
-
-                    res.render('product-list', optionObj);
-
-                    cb();
-                });
+        business.GetProductByCategoryID(categoryID, pageIndex, function (
+          products,
+          nProducts
+        ) {
+          if(pageIndex==1){
+            let slPage =  products.length%CONST.PRODUCT_PER_PAGE ? products.length/CONST.PRODUCT_PER_PAGE +1 : products.length/CONST.PRODUCT_PER_PAGE;
+            pagi = [];
+            for(let i =1 ;i<=slPage;i++){
+              pagi [i] = {page:i,extendLink:"?category="+categoryID+"&page="+i};
             }
-        ]);
-    },
-    // All products
-    RenderProductListPage: function RenderProductListPage(req, res, next) {
-        var categoryList;
+            products = products.slice(0,products.length<=9?products.length:9)
+          }
+          optionObj.productList = products;
+          optionObj.categoryList = categoryList;
+          // optionObj.nPage = Math.floor(nProducts / CONST.PRODUCT_PER_PAGE) + 1;
+          optionObj.currentPage = pageIndex;
+          optionObj.pagination = pagi;
 
-        async.series([
-            function (cb) {
-                business.GetAllCategory(function (result) {
-                    if (result != undefined) {
-                        categoryList = result;
-                        cb();
-                    }
-                });
-            },
+          optionObj.isLogged = req.isAuthenticated();
+          res.render("product-list", optionObj);
 
-            // ROUTING
-            function (cb) {
+          cb();
+        });
+      }
+    ]);
+  },
+  // All products
+  RenderProductListPage: function RenderProductListPage(req, res, next) {
+    var categoryList;
 
-                var pageIndex = req.param('pageindex');
-                pageIndex = (pageIndex && pageIndex > 0) ? pageIndex : 0;
+    async.series([
+      function (cb) {
+        business.GetAllCategory(function (result) {
+          if (result != undefined) {
+            categoryList = result;
+            cb();
+          }
+        });
+      },
 
-                queryObj = {
-                    category: req.param('category'),
-                    size: req.param('size'),
-                    color: req.param('color'),
-                    price: req.param('price'),
-                    keyword: req.param('keyword'),
-                    sorting: req.param('sorting')
-                }
+      // ROUTING
+      function (cb) {
+        var pageIndex = req.param("page");
+        pageIndex = pageIndex && pageIndex > 0 ? pageIndex : 0;
 
-                business.GetProductByPageIndex(queryObj, pageIndex, function (products) {
-                    var optionObj = {
-                        productList: products,
-                        categoryList: categoryList
-                    }
+        queryObj = {
+          category: req.param("category"),
+          size: req.param("size"),
+          color: req.param("color"),
+          price: req.param("price"),
+          keyword: req.param("keyword"),
+          sorting: req.param("sorting")
+        };
 
-                    if (req.param('ajax') == 'true') {
-                        optionObj.layout = false;
-                        res.render('product-list', optionObj);
-                    } else {
-                        res.render('product-list', optionObj);
-                    }
-                    cb();
-                });
+        business.GetProductByPageIndex(queryObj, pageIndex, function (products) {
+          if(pageIndex==0){
+            pagi = [];
+            let slPage =  products.length%CONST.PRODUCT_PER_PAGE ? products.length/CONST.PRODUCT_PER_PAGE +1 : products.length/CONST.PRODUCT_PER_PAGE;
+            for(let i =1 ;i<=slPage;i++){
+              pagi [i] = {page:i,extendLink:"?page="+i};
             }
-        ]);
-    }
-}
+            products = products.slice(0,products.length<=9?products.length:9)
+          }
+          var optionObj = {
+            productList: products,
+            categoryList: categoryList,
+            pagination: pagi
+          };
+          optionObj.isLogged = req.isAuthenticated();
 
-var CheckoutPage = {
-    RenderCheckoutPage: function RenderCheckoutPage(req, res, next) {
-    }
+          if (req.param("ajax") == "true") {
+            optionObj.layout = false;
+            res.render("product-list", optionObj);
+          } else {
+            res.render("product-list", optionObj);
+          }
+          cb();
+        });
+      }
+    ]);
+  }
+};
 
-}
 
 var LoginPage = {
-    RenderLoginPagePOST: function RenderLoginPagePOST(req, res, next) {
-        var username = req.body['user'];
-        var pass = req.body['pass'];
-
-        var loggedIn = false;
-
-        User.find({}, function (err, adminList) {
-            if (adminList.length > 0) {
-                var i;
-                for (i = 0; i < adminList.length; i++) {
-                    if (adminList[i].username == username && adminList[i].password == pass) {
-                        req.session.userid = username;
-                        res.redirect('/admin.html');
-                        loggedIn = true;
-                        break;
-                    }
-                }
-            }
-
-            // Login failed
-            if (loggedIn == false) {
-                res.render('', { notification: 'Username or Password is incorrect', layout: 'admin/login' });
-            }
-
-        });
-    },
-    RenderLoginPageGET: function RenderLoginPageGET(req, res, next) {
-        if (req.isAuthenticated()) {
-            if (req.user.type == 'admin') {
-                res.redirect('/admin.html');
-            } else {
-                res.redirect('/');
-            }
-        } else {
-            // Login faild
-            res.render('', { layout: 'admin/login' });
-        }
+  RenderLoginPageGET: function RenderLoginPageGET(req, res, next) {
+    if (req.isAuthenticated()) {
+      if (req.user.type == "admin") {
+        res.redirect("/admin");
+      } else {
+        res.redirect("/");
+      }
+    } else {
+      // Login faild
+      res.render("", { layout: "../login" });
     }
-}
+  }
+};
 
 var RegisterPage = {
-    RenderRegisterPage: function RenderRegisterPage(req, res, next) {
-      res.render('register', {});
-    }
-
-}
+  RenderRegisterPage: function RenderRegisterPage(req, res, next) {
+    var optionObj = {
+      isLogged: req.isAuthenticated()
+    };
+    optionObj.isLogged = req.isAuthenticated();
+    res.render("register", optionObj);
+  }
+};
 
 var AdminPage = {
-    RenderAdminPageGET: function RenderAdminPageGET(req, res, next) {
-        if (!req.isAuthenticated()) {
-            res.redirect('/login.html');
-            res.end();
-        } else {
-            var table = req.param('table');
+  RenderAdminIndexPageGET: function RenderAdminIndexPageGET(req, res, next) {
+    if (!req.isAuthenticated() || req.user.type != "admin") {
+      res.redirect("/login.html");
+      res.end();
+    } else {
+      var optionObj = {
+        layout: "adminlayout",
+        user: req.user,
+        isLogged: req.isAuthenticated()
+      };
 
-            switch (table) {
-                case undefined:
-                    table = 'product';
-                case 'product':
-                    {
-                        Product.find({}, function (err, products) {
-                            console.log(products);
-                            res.render('admin/table-product', { products: products, layout: 'admin/adminlayout' });
-                        });
-                    }
-                    break;
-
-                case 'category':
-                    {
-                        Category.find({}, function (err, cats) {
-                            console.log(cats);
-                            res.render('admin/table-category', { cats: cats, layout: 'admin/adminlayout' });
-                        });
-                    }
-                    break;
-            }
-        }
-    },
-
-    RenderAdminPagePOSTProduct: function RenderAdminPagePOSTProduct(req, res, next) {
-        if (req.body['button-add'] == 'product') {
-            var sizeArray = req.body['size'].split(',');
-            var colorArray = req.body['color'].split(',');
-            var imagesArray = req.body['images'].split(',');
-            Product.create({
-                name: req.body['name'],
-                price: req.body['price'],
-                description: req.body['description'],
-                size: sizeArray,
-                color: colorArray,
-                images: imagesArray
-            }, function () {
-                console.log('Create successfully');
-            });
-        }
-
-        if (req.body['button-delete']) {
-            var id = req.body['button-delete'];
-            console.log(id);
-            Product.findOne({ _id: id }, function (err, doc) {
-                if (doc != null) {
-                    doc.remove();
-                    console.log('Remove OK');
-                }
-            })
-        }
-
-        if (req.body['button-update']) {
-            var id = req.body['button-update'];
-            console.log(id);
-            var updateObj = {
-                name: req.body['name'],
-                price: req.body['price'],
-                description: req.body['description'],
-                size: sizeArray,
-                color: colorArray,
-                images: imagesArray
-            };
-
-            Product.update({ _id: id }, updateObj, function (err) {
-                if (err) {
-                    console.log(err);
-                }
-                console.log('Update OK');
-            });
-        }
-        res.redirect('/admin.html?table=product');
-    },
-
-    RenderAdminPagePOSTCategory: function RenderAdminPagePOSTCategory(req, res, next) {
-        if (req.body['button-add'] == 'category') {
-            Category.create({
-                name: req.body['name'],
-            }, function () {
-                console.log('Create successfully');
-            });
-        }
-
-        if (req.body['button-delete']) {
-            var id = req.body['button-delete'];
-            console.log(id);
-            Category.findOne({ _id: id }, function (err, doc) {
-                if (doc != null) {
-                    doc.remove();
-                    console.log('Remove OK');
-                }
-            })
-        }
-
-        if (req.body['button-update']) {
-            var id = req.body['button-update'];
-            console.log(id);
-            var updateObj = {
-                name: req.body['name'],
-            };
-
-            Category.update({ _id: id }, updateObj, function (err) {
-                if (err) {
-                    console.log(err);
-                }
-                console.log('Update OK');
-            });
-        }
-        res.redirect('/admin.html?table=category');
+      res.render("admin/index", optionObj);
     }
-}
+  },
+
+  RenderAdminProductPage: function RenderAdminProductPage(
+    req,
+    res,
+    ajax,
+    next
+  ) {
+    if (!req.isAuthenticated() || req.user.type != "admin") {
+      res.redirect("/login.html");
+      res.end();
+    } else {
+      business.GetAllProduct(function (products) {
+        if (products == null) {
+          res.send("Lỗi: Không thể lấy danh sách sản phẩm");
+        } else {
+          var optionObj = {
+            layout: "adminlayout",
+            products: products,
+            user: req.user,
+            isLogged: req.isAuthenticated()
+          };
+          if (ajax) {
+            optionObj.layout = false;
+            res.render("admin/product", optionObj);
+          } else {
+            res.render("admin/product", optionObj);
+          }
+        }
+      });
+    }
+  },
+
+  RenderAdminUserPage: function RenderAdminUserPage(req, res, ajax, next) {
+    if (!req.isAuthenticated() || req.user.type != "admin") {
+      res.redirect("/login.html");
+      res.end();
+    } else {
+      User.find({}, function (err, users) {
+        if (users == null) {
+          res.send("Lỗi: Không thể lấy danh sách người dùng");
+        } else {
+          var optionObj = {
+            layout: "adminlayout",
+            users: users,
+            user: req.user,
+            isLogged: req.isAuthenticated()
+          };
+          if (ajax) {
+            optionObj.layout = false;
+            res.render("admin/user", optionObj);
+          } else {
+            res.render("admin/user", optionObj);
+          }
+        }
+      });
+    }
+  },
+
+  RenderAdminOrderPage: function RenderAdminOrderPage(req, res, next) {
+    if (!req.isAuthenticated() || req.user.type != "admin") {
+      res.redirect("/login.html");
+      res.end();
+    } else {
+      Order.find({}, function (err, orders) {
+        if (orders == null) {
+          res.send("Lỗi: Không thể lấy danh sách đơn hàng");
+        } else {
+          var optionObj = {
+            orders: orders,
+            layout: "adminlayout",
+            user: req.user,
+            isLogged: req.isAuthenticated()
+          };
+          if (req.param("ajax") == "true") {
+            optionObj.layout = false;
+          }
+          res.render("admin/order", optionObj);
+        }
+      });
+    }
+  }
+};
 
 var CheckoutPage = {
-    RenderCheckoutPageGET: function RenderCartDetailPageGET(req, res, next) {
-        var optionObj = {};
-        var cartDetail = [];
-
-        // var sessionId = req.sessionID;
-        business.GetCart(req.sessionID, function (cart) {
-            if (cart == null || cart.detail.length == 0) {
-                optionObj.cartIsEmpty = true;
-                res.render('checkout', optionObj);
+  RenderCheckoutPageGET: function RenderCartDetailPageGET(req, res, next) {
+    var optionObj = {};
+    var cartDetail = [];
+    optionObj.isLogged = req.isAuthenticated();
+    // var sessionId = req.sessionID;
+    business.GetCart(req.sessionID, function (cart) {
+      if (cart == null || cart.detail.length == 0) {
+        optionObj.cartIsEmpty = true;
+        res.render("checkout", optionObj);
+      } else {
+        async.series([
+          function (cb1) {
+            async.eachSeries(
+              cart.detail,
+              function (currentCartDetail, cb) {
+                business.GetProduct(
+                  currentCartDetail.product.toString(),
+                  function (product) {
+                    if (product && product != null) {
+                      cartDetail.push({
+                        image: product.images[0],
+                        color: this.color,
+                        size: this.size,
+                        name: product.name,
+                        quantity: this.quantity,
+                        price: product.price,
+                        id: product._id
+                      });
+                    }
+                    cb();
+                  }.bind(currentCartDetail)
+                );
+              },
+              function (err) {
+                if (err) {
+                  console.log(err);
+                }
+                cb1();
+              }
+            );
+          },
+          function (cb) {
+            optionObj.cartDetail = cartDetail;
+            optionObj.cartIsEmpty = false;
+            if (req.param("ajax") == "true") {
+              optionObj.layout = false;
+              res.render("partials/checkout-list", optionObj);
             } else {
-                async.series([
-                    function (cb1) {
-                        async.eachSeries(cart.detail, function (currentCartDetail, cb) {
-                            business.GetProduct(currentCartDetail.product.toString(), function (product) {
-                                if (product && product != null) {
-                                    cartDetail.push({
-                                        image: product.images[0],
-                                        color: this.color,
-                                        size: this.size,
-                                        name: product.name,
-                                        quantity: this.quantity,
-                                        price: product.price,
-                                        id: product._id
-                                    })
-                                };
-                                cb();
-                            }.bind(currentCartDetail));
-                        }, function (err) {
-                            if (err) {
-                                console.log(err);
-                            }
-                            cb1();
-                        });
+                optionObj.totalPrice = business.ToCurrencyFormat(business.GetTotalPriceCart(cart.detail));
+                for (var x of cart.detail) {
+                    x.price = business.ToCurrencyFormat(x.price);
+                    x.totalPrice = business.ToCurrencyFormat(x.totalPrice);
+                }     
+                optionObj.cartDetail = cart.detail;
+                optionObj.cartIsEmpty = false;
 
-                    },
-                    function (cb) {
-                        optionObj.cartDetail = cartDetail;
-                        optionObj.cartIsEmpty = false;
-                        if (req.param('ajax') == 'true') {
-                            optionObj.layout = false;
-                            res.render('partials/checkout-list', optionObj);
 
-                        } else {
-                            res.render('checkout', optionObj);
-                        }
-                        cb();
-                    }])
+                if (req.param('ajax') == 'true') {
+                    optionObj.layout = false;
+                    res.render('partials/checkout-list', optionObj);
+
+                } else {
+                    res.render('checkout', optionObj);
+                }
             }
-        });
-    }
-}
+            cb();
+          }
+        ]);
+      }
+    });
+  }
+};
 
 var CartForm = {
     RenderCartFormGET: function RenderCartFormGET(req, res, next) {
         var optionObj = {};
-        var cartDetail = [];
+        optionObj.isLogged = req.isAuthenticated();
 
         // var sessionId = req.sessionID;
         business.GetCart(req.sessionID, function (cart) {
             if (cart == null || cart.detail.length == 0) {
-                res.send("Your cart is empty");
+                res.send("Giỏ hàng rỗng");
             } else {
-                async.series([
-                    function (cb1) {
-                        async.eachSeries(cart.detail, function (currentCartDetail, cb) {
-                            business.GetProduct(currentCartDetail.product.toString(), function (product) {
-                                if (product && product != null) {
-                                    cartDetail.push({
-                                        image: product.images[0],
-                                        color: this.color,
-                                        size: this.size,
-                                        name: product.name,
-                                        quantity: this.quantity,
-                                        price: product.price,
-                                        id: product._id
-                                    })
-                                };
-                                cb();
-                            }.bind(currentCartDetail));
-                        }, function (err) {
-                            if (err) {
-                                console.log(err);
-                            }
-                            cb1();
-                        });
+                optionObj.totalPrice = business.ToCurrencyFormat(business.GetTotalPriceCart(cart.detail));
+                for (var x of cart.detail) {
+                    x.price = business.ToCurrencyFormat(x.price);
+                    x.totalPrice = business.ToCurrencyFormat(x.totalPrice);
+                }     
 
-                    },
-                    function (cb) {
-                        optionObj.cartDetail = cartDetail;
-                        optionObj.layout = false;
-
-                        res.render('partials/cart', optionObj);
-                        cb();
-                    }])
+                optionObj.cartDetail = cart.detail;
+                optionObj.layout = false;
+                
+                res.render('partials/cart', optionObj);
             }
         });
     }
 }
 
+var AccountSettingsPage = {
+  RenderAccountSettingsPage: function RenderAccountSettingsPage(
+    req,
+    res,
+    next
+  ) {
+    var optionObj = {
+      isLogged: req.isAuthenticated()
+    };
+    res.render("account-settings", optionObj);
+  }
+};
 
 module.exports.IndexPage = IndexPage;
 module.exports.AdminPage = AdminPage;
@@ -451,3 +495,4 @@ module.exports.ProductPage = ProductPage;
 module.exports.CheckoutPage = CheckoutPage;
 module.exports.RegisterPage = RegisterPage;
 module.exports.CartForm = CartForm;
+module.exports.AccountSettingsPage = AccountSettingsPage;

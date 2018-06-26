@@ -16,6 +16,7 @@ var app = express();
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 
+
 // Connect to database
 var mongoose = require('mongoose');
 mongoose.connect(CONST.CONNECTION_STRING);
@@ -36,15 +37,16 @@ app.set('view engine', 'hbs');
 app.use(session({
   secret: 'sdfl$lkdjflK$lkjdf@L@Klkdjf4',
   cookie: {
-    maxAge: 1000 * 60 * 5
+    maxAge: 1000 * 60 * 30
   }
   // resave: false,
   // saveUninitialized: false,
 }))
 
-// passport setup
+// Passport setup
 app.use(passport.initialize());
 app.use(passport.session());
+
 passport.serializeUser(function (user, done) {
   done(null, user.username);
 });
@@ -89,9 +91,11 @@ app.use(logger('dev'));
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
+// Static file serving
 app.use(express.static(path.join(__dirname, 'public')));
+app.use('/admin', express.static(path.join(__dirname, 'public/admin')));
 
-
+// ===================================================
 var indexRouter = require('./routes/index');
 var productRouter = require('./routes/product');
 var productListRouter = require('./routes/product-list');
@@ -101,19 +105,21 @@ var logoutRouter = require('./routes/logout');
 var checkoutRouter = require('./routes/checkout');
 var cartRouter = require('./routes/cart');
 var registerRouter = require('./routes/register');
+var accountSettingsRouter = require('./routes/account-settings');
+
 // ================= ROUTING ==============
 app.use('/', indexRouter);
 app.use('/index.html', indexRouter);
 app.use('/product.html', productRouter);
 app.use('/product-list.html', productListRouter);
-app.use('/admin.html', adminRouter);
 app.use('/login.html', loginRouter);
 app.use('/logout.html', logoutRouter);
 app.use('/checkout.html', checkoutRouter);
 app.use('/cart.html', cartRouter);
-app.use('/register.html',registerRouter);
+app.use('/register.html', registerRouter);
+app.use('/account-settings.html', accountSettingsRouter);
+app.use('/admin', adminRouter);
 // ================= ROUTING ==============
-
 
 // ============= DEBUG DAL.js
 // var dalRouter = require('./models/DAL');
@@ -135,9 +141,13 @@ app.use(function (err, req, res, next) {
   res.locals.message = err.message;
   res.locals.error = req.app.get('env') === 'development' ? err : {};
 
-  // render the error page
-  res.status(err.status || 500);
-  res.render('error');
+  if (err.status == 404) {
+    res.render('404', { layout: false });
+  } else {
+    // render the error page
+    res.status(err.status || 500);
+    res.render('error');
+  }
 });
 
 module.exports = app;

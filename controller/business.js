@@ -60,6 +60,10 @@ function GetRelatedProduct(productID, topN, callback) {
 // 2.1.6
 function GetAllProductComments(productID, callback) {
     DAL.QueryProductComments(productID, 0, function (comments) {
+        for (var x of comments) {
+            var y = new Date(x.date);
+            x.date = y.getDate() + "/" + y.getMonth() + "/" + y.getFullYear() + "  " + y.getHours() + ":" + y.getMinutes();
+        }
         callback(comments);
     })
 }
@@ -102,30 +106,50 @@ function GetCart(sessionID, callback) {
 
 // 2.1.11
 function AddItemToCart(sessionID, productID, quantity, color, size, callback) {
-    var cartDetal = {
-        product: new mongoose.Types.ObjectId(productID),
-        quantity: quantity,
-        color: color,
-        size: size
-    }
 
-    DAL.InsertItemToCart(sessionID, cartDetal, function (success) {
-        callback(success);
+    GetProduct(productID, function (product) {
+        if (product && product != null) {
+            var cartDetal = {
+                product: new mongoose.Types.ObjectId(productID),
+                name: product.name,
+                quantity: quantity,
+                color: color,
+                size: size,
+                price: product.price,
+                image: product.images[0],
+                totalPrice: Number.parseInt(product.price) * Number.parseInt(quantity)
+            }
+
+            DAL.InsertItemToCart(sessionID, cartDetal, function (success) {
+                callback(success);
+            })
+        } else {
+            console.log("Product not found");
+            callback(false);
+        }
     })
 }
 
 // 2.1.12
 function ChangeItemInCart(sessionID, itemIndex, productID, quantity, color, size, callback) {
-    var newCartDetail = {
-        product: new mongoose.Types.ObjectId(productID),
-        quantity: quantity,
-        color: color,
-        size: size
-    }
+    GetProduct(productID, function (product) {
+        if (product && product != null) {
+            var newCartDetail = {
+                product: new mongoose.Types.ObjectId(productID),
+                quantity: quantity,
+                color: color,
+                size: size,
+                totalPrice: Number.parseInt(product.price) * Number.parseInt(quantity)
+            }
 
-    DAL.UpdateItemInCart(sessionID, itemIndex, newCartDetail, function (success) {
-        callback(success);
+            DAL.UpdateItemInCart(sessionID, itemIndex, newCartDetail, function (success) {
+                callback(success);
+            })
+        } else {
+            callback(false);
+        }
     })
+
 }
 
 // 2.1.13
@@ -189,12 +213,13 @@ function ValidateLogin(username, password, callback) {
 }
 
 // 2.1.17
-function ChangeUserInfo(username, name, phone, address, callback) {
+function ChangeUserInfo(username, name, phone, address, type, callback) {
     // Build new USER
     var newUser = {
         name: name,
         phone: phone,
-        address: address
+        address: address,
+        type: type
     }
 
     // Update USER in database
@@ -290,9 +315,41 @@ function GetTopProducts(topN, callback) {
 
 // 2.1.24
 function GetProduct(productID, callback) {
-   DAL.QueryOneProduct(productID, function (product) {
-       callback(product);
-   })
+    DAL.QueryOneProduct(productID, function (product) {
+        callback(product);
+    })
+}
+
+// 2.1.25
+function IncreaseProductView(productID, amount, callback) {
+    DAL.QueryOneProduct(productID, function (product) {
+        if (product != null && product) {
+            var newProduct = {
+                view: product.view + amount
+            }
+
+            DAL.UpdateProduct(productID, newProduct, function (success) {
+                return callback(success);
+            })
+        } else {
+            return callback(false);
+        }
+    })
+}
+
+// Convert a string number to currency format
+
+function ToCurrencyFormat(s) {
+    return s.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",")
+}
+
+function GetTotalPriceCart(cartDetail) {
+    var totalPrice = 0;
+
+    for (var y of cartDetail) {
+        totalPrice += y.price * Number.parseInt(y.quantity);
+    }
+    return totalPrice;
 }
 var exportObj = {
     GetAllProduct: GetAllProduct,
@@ -316,7 +373,10 @@ var exportObj = {
     AddProductComments: AddProductComments,
     GenerateCart: GenerateCart,
     GetProduct: GetProduct,
-    Order: Order
+    Order: Order,
+    IncreaseProductView: IncreaseProductView,
+    ToCurrencyFormat: ToCurrencyFormat,
+    GetTotalPriceCart: GetTotalPriceCart
 };
 
 module.exports = exportObj;

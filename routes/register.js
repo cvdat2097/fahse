@@ -47,4 +47,5 @@ router.get('/registerUser', function (req, res, next) {
     res.send(success.toString());
   });
 });
+
 module.exports = router;

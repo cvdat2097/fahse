@@ -127,7 +127,8 @@ var ProductPage = {
               comment: commentList,
               pagination: pagination,
               isLogged: req.isAuthenticated(),
-              user: req.user
+              user: req.user,
+              categoryList: categoryList
             });
           } else {
             res.send("Lỗi: Không thể lấy thông tin sản phẩm");

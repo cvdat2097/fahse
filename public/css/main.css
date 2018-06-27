@@ -2443,3 +2443,8 @@ input.num-product::-webkit-outer-spin-button, input.num-product::-webkit-inner-s
 #search-textbox input {
   height: inherit ;
 }
+
+#advanced-search *{
+  width: 100%;
+  margin: 5px;
+}

@@ -126,17 +126,23 @@ function QueryProducts(queryObj, pageIndex, callback) {
                 if (err) {
                     console.log(err);
                 } else {
-                    var returnArray;
+                    Product.find(query, function (err, allProducts) {
+                        if (err) {
+                            console.log(err);
+                        } else {
+                            var returnArray;
 
-                    // process array 'products'
-                    if (sorting == undefined) {
-                        returnArray = products;
-                    } else {
-                        returnArray = products.sort(sorting);
-                    }
+                            // process array 'products'
+                            if (sorting == undefined) {
+                                returnArray = products;
+                            } else {
+                                returnArray = products.sort(sorting);
+                            }
 
-                    cb();
-                    return callback(returnArray);
+                            cb();
+                            return callback(returnArray, allProducts.length);
+                        }
+                    })
                 }
             });
 
@@ -554,7 +560,7 @@ function InsertRelatedProduct(srcProductID, relatedProductID, callback) {
 
 // 3.1.17
 function QueryOneProduct(productID, callback) {
-    Product.findOne({_id: new mongoose.Types.ObjectId(productID)}, function (err, product) {
+    Product.findOne({ _id: new mongoose.Types.ObjectId(productID) }, function (err, product) {
         if (err) {
             console.log(err);
             callback(null);
@@ -566,14 +572,14 @@ function QueryOneProduct(productID, callback) {
 
 // 3.1.18
 function UpdateProduct(productID, newProduct, callback) {
-   Product.updateOne({_id: new mongoose.Types.ObjectId(productID)}, newProduct, function (err) {
-       if (err) {
-           console.log(err);
-           return callback(false);
-       } else {
-           return callback(true);
-       }
-   })
+    Product.updateOne({ _id: new mongoose.Types.ObjectId(productID) }, newProduct, function (err) {
+        if (err) {
+            console.log(err);
+            return callback(false);
+        } else {
+            return callback(true);
+        }
+    })
 }
 
 var exportObj = {

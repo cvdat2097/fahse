@@ -13,11 +13,13 @@
     "express": "~4.16.0",
     "express-handlebars": "^3.0.0",
     "express-session": "^1.15.6",
+    "formidable": "^1.2.1",
     "hbs": "~4.0.1",
     "http-errors": "~1.6.2",
     "is-phone-number": "^1.0.4",
     "mongoose": "^5.0.17",
     "morgan": "~1.9.0",
+    "nodemailer": "^4.6.7",
     "npm": "^6.1.0",
     "passport": "^0.4.0",
     "passport-local": "^1.0.0"

@@ -3,8 +3,10 @@ var async = require('async');
 const mongoose = require('mongoose');
 var Category = require('../models/categoryModel.js');
 var Product = require('../models/productModel.js');
+var User = require('../models/userModel');
 var CONST = require('../config');
 var DAL = require('../models/DAL');
+var nodemailer = require('nodemailer');
 
 // ============== DEBUG business.js ============
 var router = express.Router();
@@ -102,15 +104,18 @@ function GetCart(sessionID, callback) {
 
 // 2.1.11
 function AddItemToCart(sessionID, productID, quantity, color, size, callback) {
-    
+
     GetProduct(productID, function (product) {
         if (product && product != null) {
             var cartDetal = {
                 product: new mongoose.Types.ObjectId(productID),
-                name: product.name, 
+                name: product.name,
                 quantity: quantity,
                 color: color,
-                size: size
+                size: size,
+                price: product.price,
+                image: product.images[0],
+                totalPrice: Number.parseInt(product.price) * Number.parseInt(quantity)
             }
 
             DAL.InsertItemToCart(sessionID, cartDetal, function (success) {
@@ -125,16 +130,24 @@ function AddItemToCart(sessionID, productID, quantity, color, size, callback) {
 
 // 2.1.12
 function ChangeItemInCart(sessionID, itemIndex, productID, quantity, color, size, callback) {
-    var newCartDetail = {
-        product: new mongoose.Types.ObjectId(productID),
-        quantity: quantity,
-        color: color,
-        size: size
-    }
+    GetProduct(productID, function (product) {
+        if (product && product != null) {
+            var newCartDetail = {
+                product: new mongoose.Types.ObjectId(productID),
+                quantity: quantity,
+                color: color,
+                size: size,
+                totalPrice: Number.parseInt(product.price) * Number.parseInt(quantity)
+            }
 
-    DAL.UpdateItemInCart(sessionID, itemIndex, newCartDetail, function (success) {
-        callback(success);
+            DAL.UpdateItemInCart(sessionID, itemIndex, newCartDetail, function (success) {
+                callback(success);
+            })
+        } else {
+            callback(false);
+        }
     })
+
 }
 
 // 2.1.13
@@ -150,11 +163,7 @@ function RegisterNewUser(type, username, password, name, email, phone, address, 
     async.series([
         function (cb) {
             // Generate email activation code
-            var possible = CONST.EMAIL_ACTIVATION_KEY;
-
-            for (var i = 0; i < 15; i++) {
-                code += possible.charAt(Math.floor(Math.random() * possible.length));
-            }
+            code = GenerateEmailActivationCode();
             cb();
         },
 
@@ -172,6 +181,10 @@ function RegisterNewUser(type, username, password, name, email, phone, address, 
             }
 
             DAL.CreateUser(newUser, function (success) {
+                if (success == true) {
+                    SendEmail(newUser.email, '/login.html/activate-email?username=' + newUser.username + '&key=' + newUser.emailActivationCode);
+                    console.log('activation email sent');
+                }
                 callback(success);
                 cb();
             })
@@ -198,7 +211,7 @@ function ValidateLogin(username, password, callback) {
 }
 
 // 2.1.17
-function ChangeUserInfo(username, name, phone, address,type, callback) {
+function ChangeUserInfo(username, name, phone, address, type, callback) {
     // Build new USER
     var newUser = {
         name: name,
@@ -322,6 +335,73 @@ function IncreaseProductView(productID, amount, callback) {
     })
 }
 
+// Convert a string number to currency format
+
+function ToCurrencyFormat(s) {
+    return s.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",")
+}
+
+function GetTotalPriceCart(cartDetail) {
+    var totalPrice = 0;
+
+    for (var y of cartDetail) {
+        totalPrice += y.price * Number.parseInt(y.quantity);
+    }
+    return totalPrice;
+}
+
+function SendEmail(to, content) {
+    var transporter = nodemailer.createTransport({
+        service: "Yandex",
+        auth: {
+            user: 'fasheactivation@yandex.com',
+            pass: 'Web123456789'
+        }
+    });
+
+    var mailOptions = {
+        from: 'fasheactivation@yandex.com',
+        to: to,
+        subject: 'Email activation',
+        text: content
+    };
+
+    transporter.sendMail(mailOptions, function (error, info) {
+        if (error) {
+            console.log(error);
+        } else {
+            console.log('Email sent: ' + info.response);
+        }
+    });
+}
+
+function GenerateEmailActivationCode() {
+    var code = "";
+    var possible = CONST.EMAIL_ACTIVATION_KEY;
+
+    for (var i = 0; i < 15; i++) {
+        code += possible.charAt(Math.floor(Math.random() * possible.length));
+    }
+
+    return code;
+}
+
+function ForgotPassword(username) {
+    var newPassword = GenerateEmailActivationCode();
+    User.updateOne({ username: username }, {
+        password: newPassword
+    }, function (err) {
+        if (err) {
+            console.log('forget password feature is not working');
+        }
+
+        GetUser(username, function (user) {
+            SendEmail(user.email, 'Mật khẩu mới: ' + user.password);
+        })
+    })
+
+}
+
 var exportObj = {
     GetAllProduct: GetAllProduct,
     GetProductByPageIndex: GetProductByPageIndex,
@@ -345,7 +425,11 @@ var exportObj = {
     GenerateCart: GenerateCart,
     GetProduct: GetProduct,
     Order: Order,
-    IncreaseProductView: IncreaseProductView
+    IncreaseProductView: IncreaseProductView,
+    ToCurrencyFormat: ToCurrencyFormat,
+    GetTotalPriceCart: GetTotalPriceCart,
+    SendEmail: SendEmail,
+    ForgotPassword: ForgotPassword
 };
 
 module.exports = exportObj;

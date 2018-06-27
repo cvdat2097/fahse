@@ -209,3 +209,33 @@ function checkInforRegister(username, password, name, email, phone, address, ver
   isPhoneNumber(username, password, name, email, phone, address);
   return true;
 }
+function UpdateCheckoutCart() {
+    var itemID = document.querySelectorAll(".item-productid");
+    var itemQuantity = document.querySelectorAll(".item-productquantity");
+    var itemProductID = document.querySelectorAll(".item-productid");
+
+    var dataArray = [];
+
+    for (var i = 0; i < itemID.length; i++) {
+        dataArray.push({
+            _id: itemProductID[i].innerHTML,
+            quantity: itemQuantity[i].value
+        })
+    }
+
+    for (var i = 0; i < itemID.length; i++) {
+        var http = new XMLHttpRequest();
+        http.open("POST", "/checkout.html/updatecart/", true);
+        http.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
+        http.onreadystatechange = function () {
+            if (this.readyState == 4 && this.status == 200) {
+                console.log(this.response);
+            }
+        }
+        console.log("sent");
+        http.send("?productID=" + itemID[i].innerHTML.toString() +
+            "&quantity=" + itemQuantity[i].value.toString() +
+            "&itemIndex=" + i.toString() +
+            "&data=" + JSON.stringify(dataArray));
+    }
+}

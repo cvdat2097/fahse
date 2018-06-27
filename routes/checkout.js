@@ -2,6 +2,8 @@ var express = require('express');
 var router = express.Router();
 var renderer = require('../views/renderer');
 var business = require('../controller/business');
+var Cart = require('../models/cartModel');
+var async = require('async');
 
 // Routing
 router.get('/', function (req, res, next) {
@@ -21,5 +23,52 @@ router.get('/', function (req, res, next) {
     }
   }
 });
+
+router.post('/updatecart', function (req, res, next) {
+
+  var productID = req.param('productID');
+  var quantity = req.param('quantity');
+  var itemIndex = req.param('itemIndex');
+
+  var data = JSON.parse(req.param('data'));
+
+  Cart.findOne({ session: req.sessionID }, function (err, cartFound) {
+    if (err) {
+      console.log(err);
+      res.send('false');
+    } else if (cartFound && cartFound != null) {
+      async.series([
+        function (cb) {
+          for (var i = 0; i < data.length; i++) {
+            for (var y of cartFound.detail) {
+              if (y.product.toString() === data[i]._id.toString()) {
+                y.quantity = data[i].quantity;
+              }
+            }
+            if (i == data.length - 1) {
+              cb();
+            }
+          }
+        },
+
+        function (cb) {
+          Cart.replaceOne({ session: req.sessionID }, cartFound, function (err) {
+            if (err) {
+              console.log(err);
+              res.send('false');
+              cb();
+            } else {
+              res.send('true');
+              cb();
+            }
+          })
+        }
+      ])
+    } else {
+      res.send('false');
+    }
+  })
+});
+
 
 module.exports = router;

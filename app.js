@@ -35,7 +35,7 @@ app.set('view engine', 'hbs');
 app.use(session({
   secret: 'sdfl$lkdjflK$lkjdf@L@Klkdjf4',
   cookie: {
-    maxAge: 1000 * 60 * 5
+    maxAge: 1000 * 60 * 30
   }
   // resave: false,
   // saveUninitialized: false,
@@ -62,12 +62,21 @@ passport.deserializeUser(function (name, done) {
 passport.use(new LocalStrategy(function (username, password, done) {
   business.GetUser(username, function (user) {
     if (user != null && user && user.username == username && user.password == password) {
-      return done(null, user);
+      if (user.emailIsActivated == false) {
+        return done("email is not activated", false);
+      }
+      else 
+      {
+        return done(null, user);
+      }
     } else {
       return done(null, false);
     }
   });
 }));
+
+
+// email setup
 
 
 // Generate new cart for each sesison

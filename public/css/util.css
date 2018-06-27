@@ -2229,7 +2229,7 @@
 /* ------------------------------------ */
 .text-white {color: white;}
 .text-black {color: black;}
-
+.text-red {color: red;}
 .text-hov-white:hover {color: white;}
 
 /* ------------------------------------ */
@@ -3172,6 +3172,12 @@ TEXT TEXT TEXT TEXT TEXT TEXT TEXT TEXT TEXT TEXT TEXT TEXT
 	line-height: 1.8;
 	text-decoration: underline;
 }
+.s-text23 {
+	font-family: Montserrat-Regular;
+	font-size: 13px;
+	color: red;
+	line-height: 1.8;
+}
 
 /*[ M-Text 16 - 30 ]
 ///////////////////////////////////////////////////////////
@@ -3765,7 +3771,7 @@ SHAPE SHAPE SHAPE SHAPE SHAPE SHAPE SHAPE SHAPE SHAPE SHAPE
 }
 
 .bo4 {
-
+  	border: 1px solid #e6e6e6;
 	border-radius: 2px;
 }
 
@@ -3838,7 +3844,7 @@ SHAPE SHAPE SHAPE SHAPE SHAPE SHAPE SHAPE SHAPE SHAPE SHAPE
 .bo-rad-15 {border-radius: 15px;}
 .bo-rad-20 {border-radius: 20px;}
 .bo-rad-23 {border-radius: 23px;}
-
+.bo-rad-margin {margin-left: 200px;}
 .bo-t-rad-2 {
 	border-top-left-radius: 2px;
 	border-top-right-radius: 2px;

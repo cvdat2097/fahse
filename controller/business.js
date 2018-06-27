@@ -29,8 +29,8 @@ function GetAllProduct(callback) {
 
 // 2.1.2
 function GetProductByPageIndex(queryObj, pageIndex, callback) {
-    DAL.QueryProducts(queryObj, pageIndex, function (products) {
-        callback(products);
+    DAL.QueryProducts(queryObj, pageIndex, function (products, nProducts) {
+        callback(products, nProducts);
     })
 }
 

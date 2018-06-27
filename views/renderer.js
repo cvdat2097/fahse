@@ -158,21 +158,38 @@ var ProductListPage = {
             function (cb) {
 
                 var pageIndex = req.param('pageindex');
-                pageIndex = (pageIndex && pageIndex > 0) ? pageIndex : 0;
+                pageIndex = (pageIndex && pageIndex > 0) ? pageIndex : 1;
 
                 queryObj = {
-                    category: req.param('category'),
-                    size: req.param('size'),
-                    color: req.param('color'),
-                    price: req.param('price'),
-                    keyword: req.param('keyword'),
-                    sorting: req.param('sorting')
+                    category: req.param('category') != "" ? req.param('category') : undefined,
+                    size: req.param('size') != "" ? req.param('size') : undefined,
+                    color: req.param('color') != "" ? req.param('color') : undefined,
+                    price: req.param('price') != "" ? req.param('price') : undefined,
+                    keyword: req.param('keyword') != "" ? req.param('keyword') : undefined,
+                    sorting: req.param('sorting') != "" ? req.param('sorting') : undefined
                 }
 
-                business.GetProductByPageIndex(queryObj, pageIndex, function (products) {
+                business.GetProductByPageIndex(queryObj, pageIndex, function (products, nProducts) {
+                    var paging = [];
+                    var currentURL = "/product-list.html?";
+
+                    for (var y in queryObj) {
+                        if (queryObj[y] != undefined) {
+                            currentURL += y + "=" + queryObj[y] + "&"
+                        }
+                    }
+
+                    for (var i = 0; i <= Math.floor(nProducts / CONST.PRODUCT_PER_PAGE); i++) {
+                        paging.push({
+                            index: i + 1,
+                            url: currentURL + "pageindex=" + (i + 1).toString()
+                        });
+                    }
+
                     var optionObj = {
                         productList: products,
-                        categoryList: categoryList
+                        categoryList: categoryList,
+                        pagination: paging
                     }
                     optionObj.isLogged = req.isAuthenticated();
 
@@ -328,7 +345,7 @@ var CheckoutPage = {
                 for (var x of cart.detail) {
                     x.price = business.ToCurrencyFormat(x.price);
                     x.totalPrice = business.ToCurrencyFormat(x.totalPrice);
-                }     
+                }
                 optionObj.cartDetail = cart.detail;
                 optionObj.cartIsEmpty = false;
 
@@ -359,11 +376,11 @@ var CartForm = {
                 for (var x of cart.detail) {
                     x.price = business.ToCurrencyFormat(x.price);
                     x.totalPrice = business.ToCurrencyFormat(x.totalPrice);
-                }     
+                }
 
                 optionObj.cartDetail = cart.detail;
                 optionObj.layout = false;
-                
+
                 res.render('partials/cart', optionObj);
             }
         });

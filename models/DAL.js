@@ -95,16 +95,24 @@ function QueryProducts(queryObj, pageIndex, callback) {
             if (queryObj.sorting != undefined) {
                 switch (queryObj.sorting) {
                     case "pricelowtohigh":
-                        sorting = function (a, b) { return a.price - b.price }
+                        sorting = function (a, b) {
+                            return a.price - b.price
+                        }
                         break;
                     case "pricehightolow":
-                        sorting = function (a, b) { return b.price - a.price }
+                        sorting = function (a, b) {
+                            return b.price - a.price
+                        }
                         break;
                     case "viewlowtohigh":
-                        sorting = function (a, b) { return a.view - b.view }
+                        sorting = function (a, b) {
+                            return a.view - b.view
+                        }
                         break;
                     case "viewhightolow":
-                        sorting = function (a, b) { return b.view - a.view }
+                        sorting = function (a, b) {
+                            return b.view - a.view
+                        }
                         break;
                 }
             }
@@ -152,13 +160,36 @@ function QueryProducts(queryObj, pageIndex, callback) {
 
 // 3.1.2
 function QueryRelatedProducts(productID, topN, callback) {
-    var queryFunction = Product.findOne({ _id: new mongoose.Types.ObjectId(productID) }, { relatedProducts: 1 });
+    var queryFunction = Product.findOne({
+        _id: new mongoose.Types.ObjectId(productID)
+    }, {
+            relatedProducts: 1
+        });
 
     queryFunction.exec(function (err, result) {
         if (err) {
             console.log(err);
         } else {
-            return callback(result.relatedProducts.slice(0, topN));
+            let listID = [];
+            if (result != null) {
+                let temp = result.relatedProducts.slice(0, topN);
+                for (let i = 0; i < temp.length; i++) {
+                    listID[i] = temp[i].product;
+                }
+                // listID = ["5b2e59004d01e4362459c83f","5b2e58fe4d01e4362459c83e"]
+                let arrResult = [];
+                let product = Product.find({
+                    _id: listID
+                });
+                product.exec(function (err, products) {
+                    if (err) {
+                        console.log(err);
+                    } else {
+                        arrResult = products;
+                    }
+                    return callback(arrResult);
+                });
+            }
         }
     });
 }
@@ -172,15 +203,19 @@ function QueryProductComments(productID, pageIndex, callback) {
     var queryFunction;
 
     if (pageIndex > 0) {
-        queryFunction = Product.findOne({ _id: new mongoose.Types.ObjectId(productID) }, {
-            comment: {
-                $slice: [CONST.COMMENT_PER_PAGE * (pageIndex - 1), CONST.COMMENT_PER_PAGE]
-            }
-        });
+        queryFunction = Product.findOne({
+            _id: new mongoose.Types.ObjectId(productID)
+        }, {
+                comment: {
+                    $slice: [CONST.COMMENT_PER_PAGE * (pageIndex - 1), CONST.COMMENT_PER_PAGE]
+                }
+            });
     } else {
-        queryFunction = Product.findOne({ _id: new mongoose.Types.ObjectId(productID) }, {
-            comment: 1
-        });
+        queryFunction = Product.findOne({
+            _id: new mongoose.Types.ObjectId(productID)
+        }, {
+                comment: 1
+            });
     }
 
     queryFunction.exec(function (err, result) {
@@ -199,17 +234,20 @@ function InsertProductComments(productID, comment, callback) {
         return callback(false);
     }
 
-    Product.update(
-        { _id: new mongoose.Types.ObjectId(productID) },
-        { $push: { comment: comment } }, function (err) {
+    Product.update({
+        _id: new mongoose.Types.ObjectId(productID)
+    }, {
+            $push: {
+                comment: comment
+            }
+        }, function (err) {
             if (err) {
                 console.log(err);
                 return callback(false);
             } else {
                 return callback(true);
             }
-        }
-    )
+        })
 }
 
 // 3.1.5
@@ -232,7 +270,9 @@ function CreateCart(sessionID, callback) {
 // 3.1.6
 function QueryCart(sessionID, callback) {
     if (sessionID) {
-        Cart.findOne({ session: sessionID }).exec(function (err, cart) {
+        Cart.findOne({
+            session: sessionID
+        }).exec(function (err, cart) {
             if (err) {
                 console.log(err);
                 callback(null);
@@ -252,32 +292,37 @@ function QueryCart(sessionID, callback) {
 
 // 3.1.7
 function InsertItemToCart(sessionID, newCartDetail, callback) {
-    if (!newCartDetail || !newCartDetail.product || !newCartDetail.quantity || !newCartDetail.color
-        || !newCartDetail.size) {
+    if (!newCartDetail || !newCartDetail.product || !newCartDetail.quantity || !newCartDetail.color ||
+        !newCartDetail.size) {
         console.log("ERR: CartDetail is in wrong format");
         return callback(false);
     }
 
 
     // Check sessionID is valid or not
-    Cart.findOne({ session: sessionID }, function (err, res) {
+    Cart.findOne({
+        session: sessionID
+    }, function (err, res) {
         if (err) {
             console.log(err)
         } else {
             if (!res) {
                 return callback(false)
             } else {
-                Cart.update(
-                    { session: sessionID },
-                    { $push: { detail: newCartDetail } }, function (err) {
+                Cart.update({
+                    session: sessionID
+                }, {
+                        $push: {
+                            detail: newCartDetail
+                        }
+                    }, function (err) {
                         if (err) {
                             console.log(err);
                             return callback(false);
                         } else {
                             return callback(true);
                         }
-                    }
-                )
+                    })
             }
         }
     })
@@ -287,15 +332,17 @@ function InsertItemToCart(sessionID, newCartDetail, callback) {
 
 // 3.1.8
 function UpdateItemInCart(sessionID, itemIndex, newCartDetail, callback) {
-    if (!newCartDetail || !newCartDetail.product || !newCartDetail.quantity || !newCartDetail.color
-        || !newCartDetail.size) {
+    if (!newCartDetail || !newCartDetail.product || !newCartDetail.quantity || !newCartDetail.color ||
+        !newCartDetail.size) {
         console.log("ERR: CartDetail is in wrong format");
         return callback(false);
     }
 
 
     // Check sessionID is valid or not
-    Cart.findOne({ session: sessionID }, function (err, res) {
+    Cart.findOne({
+        session: sessionID
+    }, function (err, res) {
         if (err) {
             console.log(err)
         } else {
@@ -304,12 +351,11 @@ function UpdateItemInCart(sessionID, itemIndex, newCartDetail, callback) {
             } else {
                 var setObj = {};
                 setObj["detail." + itemIndex] = newCartDetail;
-                Cart.update(
-                    { session: sessionID },
-                    {
+                Cart.update({
+                    session: sessionID
+                }, {
                         $set: setObj
-                    }
-                    , function (err) {
+                    }, function (err) {
                         if (err) {
                             console.log(err)
                         } else {
@@ -324,7 +370,9 @@ function UpdateItemInCart(sessionID, itemIndex, newCartDetail, callback) {
 // 3.1.9
 function DeleteItemInCart(sessionID, itemIndex, callback) {
     // Check sessionID is valid or not
-    Cart.findOne({ session: sessionID }, function (err, res) {
+    Cart.findOne({
+        session: sessionID
+    }, function (err, res) {
         if (err) {
             console.log(err)
         } else {
@@ -334,20 +382,30 @@ function DeleteItemInCart(sessionID, itemIndex, callback) {
             } else {
                 var unsetObj = {};
                 unsetObj["detail." + itemIndex.toString()] = 1;
-                Cart.update({ session: sessionID }, { $unset: unsetObj }, function (err) {
-                    if (err) {
-                        console.log(err);
-                        callback(false);
-                    } else {
-                        Cart.update({ session: sessionID }, { $pull: { "detail": null } }, function (err) {
-                            if (err) {
-                                console.log(err);
-                            } else {
-                                callback(true);
-                            }
-                        })
-                    }
-                });
+                Cart.update({
+                    session: sessionID
+                }, {
+                        $unset: unsetObj
+                    }, function (err) {
+                        if (err) {
+                            console.log(err);
+                            callback(false);
+                        } else {
+                            Cart.update({
+                                session: sessionID
+                            }, {
+                                    $pull: {
+                                        "detail": null
+                                    }
+                                }, function (err) {
+                                    if (err) {
+                                        console.log(err);
+                                    } else {
+                                        callback(true);
+                                    }
+                                })
+                        }
+                    });
 
             }
         }
@@ -356,8 +414,8 @@ function DeleteItemInCart(sessionID, itemIndex, callback) {
 
 // 3.1.10
 function CreateUser(newUser, callback) {
-    if (!newUser || !newUser.type || !newUser.username || !newUser.password || !newUser.name || !newUser.email
-        || !newUser.phone || !newUser.address) {
+    if (!newUser || !newUser.type || !newUser.username || !newUser.password || !newUser.name || !newUser.email ||
+        !newUser.phone || !newUser.address) {
         console.log("ERR: newUser is in wrong format");
         return callback(false);
     }
@@ -400,7 +458,9 @@ function QueryUser(username, callback) {
             }
         })
     } else {
-        User.findOne({ username: username }, function (err, userFound) {
+        User.findOne({
+            username: username
+        }, function (err, userFound) {
             if (err) {
                 console.log(err);
                 callback(null);
@@ -421,7 +481,9 @@ function QueryUser(username, callback) {
 
 // 3.1.12
 function UpdateUser(username, newUser, callback) {
-    User.findOneAndUpdate({ username: username }, newUser, function (err) {
+    User.findOneAndUpdate({
+        username: username
+    }, newUser, function (err) {
         if (err) {
             console.log(err);
             callback(false);
@@ -434,8 +496,8 @@ function UpdateUser(username, newUser, callback) {
 
 // 3.1.13
 function CreateOrder(newOrder, callback) {
-    if (!newOrder || !newOrder.status || !newOrder.user || !newOrder.detail || !newOrder.note
-        || !newOrder.recipientName || !newOrder.address || !newOrder.phone) {
+    if (!newOrder || !newOrder.status || !newOrder.user || !newOrder.detail || !newOrder.note ||
+        !newOrder.recipientName || !newOrder.address || !newOrder.phone) {
         console.log("ERR in CreateOrder: newOrder is in wrong format");
         return callback(false);
     }
@@ -465,7 +527,9 @@ function QueryOrder(username, callback) {
             }
         })
     } else {
-        User.findOne({ username: username }, function (err, userFound) {
+        User.findOne({
+            username: username
+        }, function (err, userFound) {
             if (err) {
                 console.log(err);
                 return callback(null);
@@ -475,7 +539,9 @@ function QueryOrder(username, callback) {
 
                     var userID = userFound._id;
 
-                    Order.find({ user: userID }, function (err, orders) {
+                    Order.find({
+                        user: userID
+                    }, function (err, orders) {
                         if (err) {
                             console.log(err);
                             return callback(null);
@@ -507,7 +573,9 @@ function QueryCategory(queryObj, callback) {
 
 // 3.1.16
 function InsertRelatedProduct(srcProductID, relatedProductID, callback) {
-    Product.findOne({ _id: new mongoose.Types.ObjectId(srcProductID) }, function (err, srcProduct) {
+    Product.findOne({
+        _id: new mongoose.Types.ObjectId(srcProductID)
+    }, function (err, srcProduct) {
         if (err) {
             console.log(err);
             return callback(false);
@@ -515,52 +583,58 @@ function InsertRelatedProduct(srcProductID, relatedProductID, callback) {
             var relatedProductsArray = srcProduct.relatedProducts;
 
             for (var i = 0; i < relatedProductsArray.length; i++) {
-                var firstObjectID = relatedProductsArray[i].product.toString();
+                var firstObjectID = relatedProductsArray[i]._id.toString();
                 var secondObjectID = relatedProductID.toString();
                 if (firstObjectID == secondObjectID) {
                     // related product is existing in related list of srcProduct
                     var setObj = {};
                     relatedProductsArray[i].time = relatedProductsArray[i].time + 1;
                     setObj["relatedProducts." + i.toString()] = relatedProductsArray[i];
-                    Product.updateOne(
-                        { _id: new mongoose.Types.ObjectId(srcProductID) },
-                        {
+                    Product.updateOne({
+                        _id: new mongoose.Types.ObjectId(srcProductID)
+                    }, {
                             $set: setObj
-                        }
-                        , function (err) {
+                        }, function (err) {
                             if (err) {
                                 console.log(err);
                                 return callback(false);
-                            } else {
-                            }
+                            } else { }
                         });
                     return callback(true);
                 }
             }
 
             // related product doesn't exist in related list of srcProduct
-            var newRelatedProductObj = {
-                product: new mongoose.Types.ObjectId(relatedProductID),
-                time: 1
-            }
-            Product.update(
-                { _id: new mongoose.Types.ObjectId(srcProductID) },
-                { $push: { relatedProducts: newRelatedProductObj } }, function (err) {
-                    if (err) {
-                        console.log(err);
-                        return callback(false);
-                    } else {
-                        return callback(true);
-                    }
-                }
-            )
+            Product.findOne({ _id: new mongoose.Types.ObjectId(relatedProductID) }, function (err, rProduct) {
+                rProduct.view = 1;
+                Product.update({
+                    _id: new mongoose.Types.ObjectId(srcProductID)
+                }, {
+                        $push: {
+                            relatedProducts: rProduct
+                        }
+                    }, function (err) {
+                        if (err) {
+                            console.log(err);
+                            return callback(false);
+                        } else {
+                            return callback(true);
+                        }
+                    });
+            });
         }
     })
 }
 
 // 3.1.17
 function QueryOneProduct(productID, callback) {
+<<<<<<< HEAD
     Product.findOne({ _id: new mongoose.Types.ObjectId(productID) }, function (err, product) {
+=======
+    Product.findOne({
+        _id: new mongoose.Types.ObjectId(productID)
+    }, function (err, product) {
+>>>>>>> ntnhai
         if (err) {
             console.log(err);
             callback(null);

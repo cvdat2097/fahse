@@ -1,1 +1,6 @@
-
+checkInforRegister(document.getElementById('username').value,document.getElementById('password').value,document.getElementById('name').value,document.getElementById('email').value,document.getElementById('phone').value,document.getElementById('address').value,document.getElementById('verifypassword').value)
+var emailExistence = require('email-existence');
+emailExistence.check(email, function(error, response){
+      console.log('res: '+response);
+      warningText.innerHTML = "da check mail";
+  });

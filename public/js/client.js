@@ -1,5 +1,4 @@
 // product-list
-
 // Request a page base on pageIndex
 function requestProductListByPageIndex(pageIndex) {
     var http = new XMLHttpRequest();
@@ -8,8 +7,6 @@ function requestProductListByPageIndex(pageIndex) {
         if (this.readyState == 4 && this.status == 200) {
             var parser = new DOMParser();
             var xmlDoc = parser.parseFromString(this.responseText, "text/xml");
-
-
             document.getElementById('product-list-page').innerHTML = this.response;
 
         }
@@ -209,6 +206,41 @@ function checkInforRegister(username, password, name, email, phone, address, ver
   isPhoneNumber(username, password, name, email, phone, address);
   return true;
 }
+
+function checkInforRegister(username, password, name, email, phone, address, verifypassword) {
+  var warningText = document.getElementById("warning");
+  if (name == "") {
+    warningText.innerHTML = "Chưa nhập tên";
+    return false;
+  }
+  if (username == "") {
+    warningText.innerHTML = "Chưa nhập tên đăng nhập";
+    return false;
+  }
+  if (email == "") {
+    warningText.innerHTML = "Chưa nhập email";
+    return false;
+  }
+  if (phone == "") {
+    warningText.innerHTML = "Chưa nhập số điện thoại";
+    return false;
+  }
+  if (address == "") {
+    warningText.innerHTML = "Chưa nhập địa chỉ";
+    return false;
+  }
+  if (password == "") {
+    warningText.innerHTML = "Chưa nhập mật khẩu";
+    return false;
+  }
+  if (password != verifypassword) {
+    warningText.innerHTML = "Mật khẩu không khớp";
+    return false;
+  }
+  checkMail(email);
+  isPhoneNumber(username, password, name, email, phone, address);
+  return true;
+}
 function UpdateCheckoutCart() {
     var itemID = document.querySelectorAll(".item-productid");
     var itemQuantity = document.querySelectorAll(".item-productquantity");
@@ -237,5 +269,30 @@ function UpdateCheckoutCart() {
             "&quantity=" + itemQuantity[i].value.toString() +
             "&itemIndex=" + i.toString() +
             "&data=" + JSON.stringify(dataArray));
+    }
+}
+
+// ==================== PRODUCT ====================
+function PostComment(productID) {
+    var content = document.getElementById('comment-content').value;
+    var user = document.getElementById('comment-username').value;
+
+    if (user == "" || user == undefined || content=="" || content==undefined) {
+        window.alert('Vui lòng nhập tên và nội dung bình luận');
+    } else {
+        var http = new XMLHttpRequest();        
+        http.open("POST", "/product.html/comment", true);
+        http.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
+        http.onreadystatechange = function () {
+            if (this.readyState == 4 && this.status == 200) {
+                if (this.response == 'true') {
+                    console.log('Da them binh luan');
+                } else {
+                    console.log('ERR: Khong the them binh luan');
+                }
+            }
+        }
+        http.send("user=" + user.toString() + "&content=" + content.toString() + "&productID=" + productID.toString());
+        document.getElementById('comment-content').value = "";
     }
 }

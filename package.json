@@ -10,6 +10,7 @@
     "cookie-parser": "~1.4.3",
     "debug": "~2.6.9",
     "email-check": "^1.1.0",
+    "email-existence": "^0.1.6",
     "express": "~4.16.0",
     "express-handlebars": "^3.0.0",
     "express-session": "^1.15.6",

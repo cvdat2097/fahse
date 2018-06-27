@@ -62,6 +62,10 @@ function GetRelatedProduct(productID, topN, callback) {
 // 2.1.6
 function GetAllProductComments(productID, callback) {
     DAL.QueryProductComments(productID, 0, function (comments) {
+        for (var x of comments) {
+            var y = new Date(x.date);
+            x.date = y.getDate() + "/" + y.getMonth() + "/" + y.getFullYear() + "  " + y.getHours() + ":" + y.getMinutes();
+        }
         callback(comments);
     })
 }
@@ -168,7 +172,7 @@ function RegisterNewUser(type, username, password, name, email, phone, address, 
         },
 
         function (cb) {
-            // Build a USER 
+            // Build a USER
             var newUser = {
                 type: type,
                 username: username,

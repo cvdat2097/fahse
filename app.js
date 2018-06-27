@@ -3,6 +3,7 @@ const exphbs = require('express-handlebars');
 var createError = require('http-errors');
 var express = require('express');
 var path = require('path');
+var passport = require('passport');
 var cookieParser = require('cookie-parser');
 const bodyParser = require('body-parser');
 var logger = require('morgan');
@@ -14,6 +15,7 @@ var LocalStrategy = require('passport-local').Strategy;
 var app = express();
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
+
 
 // Connect to database
 var mongoose = require('mongoose');
@@ -113,6 +115,7 @@ var checkoutRouter = require('./routes/checkout');
 var cartRouter = require('./routes/cart');
 var registerRouter = require('./routes/register');
 var accountSettingsRouter = require('./routes/account-settings');
+
 // ================= ROUTING ==============
 app.use('/', indexRouter);
 app.use('/index.html', indexRouter);
@@ -126,7 +129,6 @@ app.use('/register.html', registerRouter);
 app.use('/account-settings.html', accountSettingsRouter);
 app.use('/admin', adminRouter);
 // ================= ROUTING ==============
-
 
 // ============= DEBUG DAL.js
 // var dalRouter = require('./models/DAL');

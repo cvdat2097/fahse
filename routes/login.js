@@ -59,7 +59,7 @@ router.get('/activate-email', function (req, res, next) {
 router.get('/forgot-password', function (req, res, next) { 
     var username = req.param('username');
 
-    if (username != undefined) {
+    if (username != undefined && username != "") {
         business.ForgotPassword(username);
         res.send('Mật khẩu mới đã được gửi qua email của tài khoản');
     } else {

@@ -628,13 +628,7 @@ function InsertRelatedProduct(srcProductID, relatedProductID, callback) {
 
 // 3.1.17
 function QueryOneProduct(productID, callback) {
-<<<<<<< HEAD
     Product.findOne({ _id: new mongoose.Types.ObjectId(productID) }, function (err, product) {
-=======
-    Product.findOne({
-        _id: new mongoose.Types.ObjectId(productID)
-    }, function (err, product) {
->>>>>>> ntnhai
         if (err) {
             console.log(err);
             callback(null);

@@ -29,38 +29,28 @@ router.get('/registerUser', function (req, res, next) {
   });
 });
 
-router.get('/checkphonenumber', function (req, res, next) {
-  var phone = req.param('phone');
 
-  if (phone.length >= 9) {
-    res.send('true');
-  } else {
-    res.send('false');
-  }
-
-})
 
 router.get('/', function (req, res, next) {
   renderer.RegisterPage.RenderRegisterPage(req, res, next);
 });
 router.get('/checkemail', function (req, res, next) {
   emailCheck(req.param('email'))
-  .then(function (resMail) {
-    res.send(resMail);
-  })
-  .catch(function (err) {
-    if (err.message === 'refuse') {
-      console.log('The MX server is refusing requests from your IP address.');
-    } else {
-      console.log('Undefinded error');
-    }
-  });
+    .then(function (resMail) {
+      res.send(resMail);
+    })
+    .catch(function (err) {
+      if (err.message === 'refuse') {
+        console.log('The MX server is refusing requests from your IP address.');
+      } else {
+        console.log('Undefinded error');
+      }
+    });
 });
 router.get('/checkphonenumber', function (req, res, next) {
   console.log("Da chay ham check phone");
   console.log(isPhoneNumber(req.param('phone')));
   res.send(isPhoneNumber(req.param('phone')));
-
 });
 router.get('/registerUser', function (req, res, next) {
 
@@ -94,7 +84,7 @@ router.get('/registerUser', function (req, res, next) {
       return;
     }
   })
-  business.RegisterNewUser(type, username, password, name, email, phone, address,function (success) {
+  business.RegisterNewUser(type, username, password, name, email, phone, address, function (success) {
     res.send(success.toString());
   });
 });

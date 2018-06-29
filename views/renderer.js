@@ -56,87 +56,94 @@ var ProductPage = {
     var commentList;
     var pagination;
 
-    async.series([
-      function (cb) {
-        Category.find({}, function (err, categories) {
-          categoryList = categories;
-          cb();
-        });
-      }
-      ,
-      function (cb) {
-        let productID = req.param("product");
-        business.GetRelatedProduct(productID, 1, function (products) {
-          productList = products;
-          cb();
-        });
-      },
-      function (cb) {
-        let productID = req.param("product");
-        let page = req.param("page");
-        business.GetAllProductComments(productID, function (comments) {
-          commentList = comments;
-          pagination = [];
-          let totalPage = commentList.length / 4;
-          for (let i = 0; i < totalPage; i++) {
-            pagination[i] = { page: i, _id: productID };
-          }
-          let posStart = page ? parseInt(page) * 4 : 0;
-          let posEnd = posStart + 4;
-          if (posEnd < commentList.length) {
-            commentList = commentList.slice(posStart, posEnd);
-          } else {
-            commentList = commentList.slice(posStart, commentList.length - 1);
-          }
-          console.log(commentList);
-          cb();
-        });
-      },
-      // ROUTING
-      function (cb) {
-        var productID = req.param("product");
-        business.GetProduct(productID, function (product) {
-          if (product != null && product) {
-            var optionObj = product;
+    if (req.param('product') == "" || !req.param('product')) {
+      res.send("Lỗi: Không thể lấy thông tin sản phẩm");
+    } else {
+      async.series([
+        function (cb) {
+          Category.find({}, function (err, categories) {
+            categoryList = categories;
+            cb();
+          });
+        },
 
-            for (var i = 0; i < product.category.length; i++) {
-              for (var x of categoryList) {
-                if (optionObj.category[i].toString() === x._id.toString()) {
-                  optionObj.category[i] = {
-                    name: x.name,
-                    id: x._id.toString()
-                  };
-                  break;
+        // Related products
+        function (cb) {
+          let productID = req.param("product");
+          business.GetRelatedProduct(productID, 1, function (products) {
+            productList = products;
+            cb();
+          });
+        },
+
+
+        function (cb) {
+          let productID = req.param("product");
+          let page = req.param("page");
+          business.GetAllProductComments(productID, function (comments) {
+            commentList = comments.reverse();
+            pagination = [];
+            let totalPage = commentList.length / 4;
+            for (let i = 0; i < totalPage; i++) {
+              pagination[i] = { page: i, _id: productID };
+            }
+            let posStart = page ? parseInt(page) * 4 : 0;
+            let posEnd = posStart + 4;
+            if (posEnd < commentList.length) {
+              commentList = commentList.slice(posStart, posEnd);
+            } else {
+              commentList = commentList.slice(posStart, commentList.length);
+            }
+            console.log(commentList);
+            cb();
+          });
+        },
+        // ROUTING
+        function (cb) {
+          var productID = req.param("product");
+          business.GetProduct(productID, function (product) {
+            if (product != null && product) {
+              var optionObj = product;
+
+              for (var i = 0; i < product.category.length; i++) {
+                for (var x of categoryList) {
+                  if (optionObj.category[i].toString() === x._id.toString()) {
+                    optionObj.category[i] = {
+                      name: x.name,
+                      id: x._id.toString()
+                    };
+                    break;
+                  }
                 }
               }
-            }
-            business.IncreaseProductView(product._id.toString(), 1, function (success) { });
-            optionObj.isLogged = req.isAuthenticated();
+              business.IncreaseProductView(product._id.toString(), 1, function (success) { });
+              optionObj.isLogged = req.isAuthenticated();
 
-            res.render("product", {
-              _id: optionObj._id,
-              images: optionObj.images,
-              name: optionObj.name,
-              price: optionObj.price,
-              descripton: optionObj.descripton,
-              size: optionObj.size,
-              color: optionObj.color,
-              view: optionObj.view,
-              category: optionObj.category,
-              related_product: optionObj.relatedProducts,
-              comment: commentList,
-              pagination: pagination,
-              isLogged: req.isAuthenticated(),
-              user: req.user,
-              categoryList: categoryList
-            });
-          } else {
-            res.send("Lỗi: Không thể lấy thông tin sản phẩm");
-          }
-        });
-        cb();
-      }
-    ]);
+              res.render("product", {
+                _id: optionObj._id,
+                images: optionObj.images,
+                name: optionObj.name,
+                price: optionObj.price,
+                descripton: optionObj.descripton,
+                size: optionObj.size,
+                color: optionObj.color,
+                view: optionObj.view,
+                category: optionObj.category,
+                related_product: optionObj.relatedProducts,
+                comment: commentList,
+                pagination: pagination,
+                isLogged: req.isAuthenticated(),
+                user: req.user,
+                categoryList: categoryList
+              });
+            } else {
+              res.send("Lỗi: Không thể lấy thông tin sản phẩm");
+            }
+          });
+          cb();
+        }
+      ]);
+    }
   }
 };
 
@@ -426,7 +433,6 @@ var CheckoutPage = {
               }
               optionObj.cartDetail = cart.detail;
               optionObj.cartIsEmpty = false;
-
 
               if (req.param('ajax') == 'true') {
                 optionObj.layout = false;

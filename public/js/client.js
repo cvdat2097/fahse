@@ -115,7 +115,12 @@ function Order() {
     http.onreadystatechange = function () {
         if (this.readyState == 4 && this.status == 200) {
             if (this.response == 'true') {
-                alert("Đặt hàng thành công")
+                alert("Đặt hàng thành công");
+                document.getElementById('checkout-name').value = "";
+                document.getElementById('checkout-phone').value = "";
+                document.getElementById('checkout-address').value = "";
+                document.getElementById('checkout-note').value = "";
+                UpdateCheckoutCart();
             } else if (this.response == 'chuadangnhap') {
                 alert("Vui lòng đăng nhập để đặt hàng");
             } else {
@@ -127,119 +132,95 @@ function Order() {
     http.send();
 }
 function checkMail(email) {
-  var warningText = document.getElementById("warning");
-	var http = new XMLHttpRequest();
-	http.open("GET", "/register.html/checkemail?email=" + email.toString(), true);
+    var warningText = document.getElementById("warning");
+    var http = new XMLHttpRequest();
+    http.open("GET", "/register.html/checkemail?email=" + email.toString(), true);
     http.onreadystatechange = function () {
         if (this.readyState == 4 && this.status == 200) {
-              if (this.response == 'false') {
-                  warningText.innerHTML = "Email không  hợp lệ";
-              }
+            if (this.response == 'false') {
+                warningText.innerHTML = "Email không  hợp lệ";
+            }
         }
     }
-	http.send();
+    http.send();
 }
 function isPhoneNumber(username, password, name, email, phone, address) {
     var warningText = document.getElementById("warning");
-	var http = new XMLHttpRequest();
-	http.open("GET", "/register.html/checkphonenumber?phone=" + phone.toString(), true);
+    var http = new XMLHttpRequest();
+    http.open("GET", "/register.html/checkphonenumber?phone=" + phone.toString(), true);
     http.onreadystatechange = function () {
         if (this.readyState == 4 && this.status == 200) {
-                if (this.response == 'true') {
-                  warningText.innerHTML = "";
-                  registerUser(username, password, name, email, phone, address);
-                } else {
-                  warningText.innerHTML = "Số điện thoại không  hợp lệ";
-                }
+            if (this.response == 'true') {
+                warningText.innerHTML = "";
+                registerUser(username, password, name, email, phone, address);
+
+                // Clear data in textboxes
+                document.getElementById('username').value = "";
+                document.getElementById('password').value = "";
+                document.getElementById('name').value = "";
+                document.getElementById('email').value = "";
+                document.getElementById('phone').value = "";
+                document.getElementById('address').value = "";
+                document.getElementById('verifypassword').value = "";
+                document.getElementById('address').value = "";
+            } else {
+                warningText.innerHTML = "Số điện thoại không  hợp lệ";
+            }
         }
     }
-	http.send();
+    http.send();
 }
 function registerUser(username, password, name, email, phone, address) {
-	var http = new XMLHttpRequest();
-  var warningText = document.getElementById("warning");
-	http.open("GET", "/register.html/registerUser?type=customer&username=" +  username.toString() + "&password=" + password.toString() + "&name=" + name.toString() + "&email=" + email.toString() + "&phone=" + phone.toString() + "&address=" + address.toString(), true);
+    var http = new XMLHttpRequest();
+    var warningText = document.getElementById("warning");
+    http.open("GET", "/register.html/registerUser?type=customer&username=" + username.toString() + "&password=" + password.toString() + "&name=" + name.toString() + "&email=" + email.toString() + "&phone=" + phone.toString() + "&address=" + address.toString(), true);
     http.onreadystatechange = function () {
         if (this.readyState == 4 && this.status == 200) {
-                if (this.response == 'true') {
-                  alert("Đăng kí thành công");
-                }
-                else {
-                  alert("Không thể đăng kí. Vui lòng thử lại sau");
-                }
+            if (this.response == 'true') {
+                alert("Đăng kí thành công");
+            }
+            else {
+                alert("Không thể đăng kí. Vui lòng thử lại sau");
+            }
         }
     }
-	http.send();
+    http.send();
 }
 
-function checkInforRegister(username, password, name, email, phone, address, verifypassword) {
-  var warningText = document.getElementById("warning");
-  if (name == "") {
-    warningText.innerHTML = "Chưa nhập tên";
-    return false;
-  }
-  if (username == "") {
-    warningText.innerHTML = "Chưa nhập tên đăng nhập";
-    return false;
-  }
-  if (email == "") {
-    warningText.innerHTML = "Chưa nhập email";
-    return false;
-  }
-  if (phone == "") {
-    warningText.innerHTML = "Chưa nhập số điện thoại";
-    return false;
-  }
-  if (address == "") {
-    warningText.innerHTML = "Chưa nhập địa chỉ";
-    return false;
-  }
-  if (password == "") {
-    warningText.innerHTML = "Chưa nhập mật khẩu";
-    return false;
-  }
-  if (password != verifypassword) {
-    warningText.innerHTML = "Mật khẩu không khớp";
-    return false;
-  }
-  checkMail(email);
-  isPhoneNumber(username, password, name, email, phone, address);
-  return true;
-}
 
 function checkInforRegister(username, password, name, email, phone, address, verifypassword) {
-  var warningText = document.getElementById("warning");
-  if (name == "") {
-    warningText.innerHTML = "Chưa nhập tên";
-    return false;
-  }
-  if (username == "") {
-    warningText.innerHTML = "Chưa nhập tên đăng nhập";
-    return false;
-  }
-  if (email == "") {
-    warningText.innerHTML = "Chưa nhập email";
-    return false;
-  }
-  if (phone == "") {
-    warningText.innerHTML = "Chưa nhập số điện thoại";
-    return false;
-  }
-  if (address == "") {
-    warningText.innerHTML = "Chưa nhập địa chỉ";
-    return false;
-  }
-  if (password == "") {
-    warningText.innerHTML = "Chưa nhập mật khẩu";
-    return false;
-  }
-  if (password != verifypassword) {
-    warningText.innerHTML = "Mật khẩu không khớp";
-    return false;
-  }
-  checkMail(email);
-  isPhoneNumber(username, password, name, email, phone, address);
-  return true;
+    var warningText = document.getElementById("warning");
+    if (name == "") {
+        warningText.innerHTML = "Chưa nhập tên";
+        return false;
+    }
+    if (username == "") {
+        warningText.innerHTML = "Chưa nhập tên đăng nhập";
+        return false;
+    }
+    if (email == "") {
+        warningText.innerHTML = "Chưa nhập email";
+        return false;
+    }
+    if (phone == "") {
+        warningText.innerHTML = "Chưa nhập số điện thoại";
+        return false;
+    }
+    if (address == "") {
+        warningText.innerHTML = "Chưa nhập địa chỉ";
+        return false;
+    }
+    if (password == "") {
+        warningText.innerHTML = "Chưa nhập mật khẩu";
+        return false;
+    }
+    if (password != verifypassword) {
+        warningText.innerHTML = "Mật khẩu không khớp";
+        return false;
+    }
+    checkMail(email);
+    isPhoneNumber(username, password, name, email, phone, address);
+    return true;
 }
 function UpdateCheckoutCart() {
     var itemID = document.querySelectorAll(".item-productid");
@@ -277,10 +258,10 @@ function PostComment(productID) {
     var content = document.getElementById('comment-content').value;
     var user = document.getElementById('comment-username').value;
 
-    if (user == "" || user == undefined || content=="" || content==undefined) {
+    if (user == "" || user == undefined || content == "" || content == undefined) {
         window.alert('Vui lòng nhập tên và nội dung bình luận');
     } else {
-        var http = new XMLHttpRequest();        
+        var http = new XMLHttpRequest();
         http.open("POST", "/product.html/comment", true);
         http.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
         http.onreadystatechange = function () {

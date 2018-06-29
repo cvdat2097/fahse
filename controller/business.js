@@ -3,7 +3,6 @@ var async = require('async');
 const mongoose = require('mongoose');
 var Category = require('../models/categoryModel.js');
 var Product = require('../models/productModel.js');
-var Cart = require('../models/cartModel');
 var User = require('../models/userModel');
 var CONST = require('../config');
 var DAL = require('../models/DAL');
@@ -187,7 +186,7 @@ function RegisterNewUser(type, username, password, name, email, phone, address, 
 
             DAL.CreateUser(newUser, function (success) {
                 if (success == true) {
-                    SendEmail(newUser.email, 'Link kích hoạt tài khoản: http://localhost:3000/login.html/activate-email?username=' + newUser.username + '&key=' + newUser.emailActivationCode);
+                    SendEmail(newUser.email, '/login.html/activate-email?username=' + newUser.username + '&key=' + newUser.emailActivationCode);
                     console.log('activation email sent');
                 }
                 callback(success);
@@ -270,20 +269,6 @@ function Order(username, sessionID, note, recipientName, address, phone, callbac
                         // Create Order in database
                         DAL.CreateOrder(newOrder, function (success) {
                             if (success) {
-                                Cart.remove({session: sessionID},function (err) {
-                                    if (err) {
-                                        console.log(err);
-                                    } else {
-                                        DAL.CreateCart({
-                                            session: sessionID,
-                                            detail: []
-                                        }, function (success) {
-                                            console.log("Cart reset");
-                                        })
-                                    }
-                                    
-                                })
-
                                 // Update related products
                                 var realtedProductsArray = cartFound.detail;
 

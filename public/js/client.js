@@ -164,6 +164,8 @@ function registerUser(username, password, name, email, phone, address) {
         if (this.readyState == 4 && this.status == 200) {
             if (this.response == 'true') {
                 alert("Đăng kí thành công");
+                
+                
             }
             else {
                 alert("Không thể đăng kí. Vui lòng thử lại sau");

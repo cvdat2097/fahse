@@ -5,7 +5,6 @@ var renderer = require('../views/renderer');
 var business = require('../controller/business');
 var isPhoneNumber = require('is-phone-number');
 var User = require('../models/userModel.js');
-<<<<<<< HEAD
 function validateEmail(email) {
   var re = /^(([^<>()[\]\\.,;:\s@\"]+(\.[^<>()[\]\\.,;:\s@\"]+)*)|(\".+\"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
   return re.test(email);
@@ -40,8 +39,6 @@ router.get('/checkphonenumber', function (req, res, next) {
   }
 
 })
-=======
->>>>>>> parent of e4d9f44... Merge branch 'master' of https://github.com/cvdat2097/fahse
 
 router.get('/', function (req, res, next) {
   renderer.RegisterPage.RenderRegisterPage(req, res, next);
@@ -74,7 +71,6 @@ router.get('/registerUser', function (req, res, next) {
   var email = req.param('email');
   var password = req.param('password');
   var type = req.param('type');
-<<<<<<< HEAD
 
   //check mail
   if (validateEmail(email)) {
@@ -97,13 +93,6 @@ router.get('/registerUser', function (req, res, next) {
       res.send('existed');
       return;
     }
-=======
-  User.findOne(username,function (err, userFound) {
-	if (userFound == null) {
-	} else {
-		res.send('existed');
-	}
->>>>>>> parent of e4d9f44... Merge branch 'master' of https://github.com/cvdat2097/fahse
   })
   business.RegisterNewUser(type, username, password, name, email, phone, address,function (success) {
     res.send(success.toString());
